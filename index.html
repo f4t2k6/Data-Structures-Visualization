@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Visualize Data Structure</title>
+</head>
+<body>
+    
+    <header class="top-navbar">
+        <div class="brand">Mô Phỏng CTDL</div>
+        <nav class="nav-links">
+            <a href="#" class="nav-item active" onclick="switchTab('linkedlist', event)">DS Liên Kết</a>
+            <a href="#" class="nav-item" onclick="switchTab('stack', event)">Ngăn Xếp (Stack)</a>
+            <a href="#" class="nav-item" onclick="switchTab('queue', event)">Hàng Đợi (Queue)</a>
+            <a href="#" class="nav-item" onclick="switchTab('tree', event)">Cây (Tree)</a>
+        </nav>
+    </header>
+
+    <div class="main-layout">
+        
+        <aside class="sidebar-controls">
+            <h3>Bảng Điều Khiển</h3>
+            
+            <div class="control-group">
+                <label for="value-input">Giá trị (Value):</label>
+                <input type="number" id="value-input" placeholder="Nhập số...">
+            </div>
+
+            <div id="controls-linkedlist" class="control-section">
+                <div class="control-group">
+                    <label>Vị trí (Index):</label>
+                    <input type="number" id="index-input" placeholder="0">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary">Thêm đầu (Head)</button>
+                    <button class="btn btn-primary">Thêm cuối (Tail)</button>
+                    <button class="btn btn-secondary">Thêm tại Index</button>
+                    <div class="separator"></div>
+                    <button class="btn btn-danger">Xóa đầu</button>
+                    <button class="btn btn-danger">Xóa cuối</button>
+                    <button class="btn btn-outline">Tìm kiếm</button>
+                </div>
+            </div>
+
+            <div id="controls-stack" class="control-section" style="display: none;">
+                <div class="button-group">
+                    <button class="btn btn-primary">Đẩy vào (Push)</button>
+                    <button class="btn btn-danger">Lấy ra (Pop)</button>
+                    <button class="btn btn-outline">Xem đỉnh (Peek)</button>
+                    <div class="separator"></div>
+                    <button class="btn btn-secondary">Xóa hết (Clear)</button>
+                </div>
+            </div>
+
+            <div id="controls-queue" class="control-section" style="display: none;">
+                <div class="button-group">
+                    <button class="btn btn-primary">Xếp hàng (Enqueue)</button>
+                    <button class="btn btn-danger">Rời hàng (Dequeue)</button>
+                    <button class="btn btn-outline">Xem đầu (Front)</button>
+                    <div class="separator"></div>
+                    <button class="btn btn-secondary">Xóa hết (Clear)</button>
+                </div>
+            </div>
+
+             <div id="controls-tree" class="control-section" style="display: none;">
+                <div class="button-group">
+                    <button class="btn btn-primary">Thêm Node (Insert)</button>
+                    <button class="btn btn-danger">Xóa Node (Delete)</button>
+                    <button class="btn btn-outline">Tìm kiếm (Find)</button>
+                    <div class="separator"></div>
+                    <button class="btn btn-secondary">Duyệt Pre-order</button>
+                    <button class="btn btn-secondary">Duyệt In-order</button>
+                    <button class="btn btn-secondary">Duyệt Post-order</button>
+                </div>
+            </div>
+
+        </aside>
+
+        <main class="canvas-container">
+            <div id="visualization-canvas" class="view-linkedlist">
+                
+                <div class="node-wrapper">
+                    <div class="node">
+                        <div class="data">15</div>
+                        <div class="pointer">Next</div>
+                    </div>
+                    <div class="arrow">→</div>
+                </div>
+                <div class="node-wrapper">
+                    <div class="node null-node">
+                        <div class="data">NULL</div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <footer class="log-panel">
+        <div class="log-header">Nhật Ký Hoạt Động (Log)</div>
+        <div class="log-content" id="log-box">
+            <p class="log-entry">[Hệ thống] Đã tải mô-đun Linked List.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
