@@ -1,0 +1,341 @@
+/* Theme theo palette:
+   #1B4079  #4D7C8A  #7F9C96  #8FAD88  #CBDF90 */
+
+:root{
+  --c1: #1B4079; /* primary */
+  --c2: #4D7C8A; /* secondary */
+  --c3: #7F9C96; /* neutral */
+  --c4: #8FAD88; /* accent */
+  --c5: #CBDF90; /* light accent */
+
+  --bg: #F7FAF6;
+  --text: #0f172a;
+  --muted: #334155;
+
+  --panel: #EAF2E5;
+  --card: #FFFFFF;
+
+  --btn: var(--c1);
+  --btn-hover: var(--c2);
+  --btn-active: #163565;
+
+  --shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  --radius: 14px;
+}
+
+*{ box-sizing: border-box; }
+
+body{
+  font-family: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* background video (tách ra class cho gọn) */
+.bg-video{
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.page{
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0 20px;
+
+  /* quan trọng: chia layout TOP / MIDDLE / BOTTOM */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Top-left block */
+.topbar{
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.brand{
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(79, 124, 138, 0.18);
+}
+
+.logo{
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.brand-text{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.school-name{
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--c1);
+}
+
+.members{
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.members span{
+  font-weight: 700;
+  color: var(--c2);
+}
+
+/* =========================
+   MIDDLE: WORK AREA
+========================= */
+.workarea{
+  flex: 1;                 /* ăn hết khoảng giữa */
+  display: flex;
+  align-items: center;     /* canh giữa theo chiều dọc */
+}
+
+.work-shell{
+  width: 100%;
+  min-height: 450px;
+  border-radius: calc(var(--radius) + 10px);
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(127, 156, 150, 0.25);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* các panel (4 ô trống) */
+.panel{
+  display: none;
+  height: 100%;
+}
+
+.panel.is-active{
+  display: block;
+}
+
+.panel-inner{
+  border-radius: calc(var(--radius) + 6px);
+  background: linear-gradient(180deg, var(--panel), rgba(203,223,144,0.35));
+  border: 1px solid rgba(127, 156, 150, 0.22);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.10);
+  padding: 14px;
+  min-height: 420px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-inner h2{
+  margin: 0;
+  color: var(--c1);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.panel-inner p{
+  margin: 0;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* =========================
+   BOTTOM: HERO (title + buttons)
+========================= */
+.hero{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+
+  padding: 22px 18px 20px;
+  border-radius: calc(var(--radius) + 6px);
+  background: linear-gradient(180deg, var(--panel), rgba(203,223,144,0.45));
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(127, 156, 150, 0.25);
+}
+
+/* đẩy khối hero xuống gần đáy */
+.hero--bottom{
+  margin-top: auto;
+}
+
+.topic{
+  margin: 0;
+  font-size: clamp(18px, 2.6vw, 30px);
+  font-weight: 800;
+  color: var(--c1);
+  text-align: center;
+  letter-spacing: 0.4px;
+}
+
+/* 4 buttons */
+.ds-buttons{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 14px;
+  width: min(900px, 100%);
+}
+
+.ds-btn{
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  cursor: pointer;
+
+  background: var(--btn);
+  color: #fff;
+
+  font-size: 16px;
+  font-weight: 800;
+
+  transition: transform .12s ease, background-color .2s ease, box-shadow .2s ease;
+  box-shadow: 0 10px 18px rgba(27, 64, 121, 0.22);
+}
+
+.ds-btn:hover{
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(77, 124, 138, 0.25);
+}
+
+.ds-btn:active{
+  background: var(--btn-active);
+  transform: translateY(0px) scale(0.99);
+}
+
+.ds-btn.active{
+  background: var(--c4);
+  color: #0b1220;
+  border-color: rgba(27, 64, 121, 0.15);
+  box-shadow: 0 12px 22px rgba(143, 173, 136, 0.35);
+}
+
+@media (max-width: 900px){
+  .ds-buttons{
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 460px){
+  .brand{ width: 100%; }
+  .ds-buttons{ grid-template-columns: 1fr; }
+  .work-shell{ padding: 14px; }
+}
+
+/* Style cho nút [x] đóng cửa sổ*/
+.panel-inner{
+  position: relative; /* để nút X bám góc */
+}
+
+.panel-close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(6px);
+
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--c1);
+
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.10);
+  transition: transform .12s ease, background-color .2s ease;
+}
+
+.panel-close:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.75);
+}
+
+.panel-close:active{
+  transform: scale(0.98);
+}
+
+/* Sources và Credit */
+.workspace-footer{
+  margin-top: auto;            /* đẩy xuống đáy panel */
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
+}
+
+.workspace-source{
+  font-size: 12px;
+  color: #64748b;
+  opacity: 0.85;
+}
+
+.workspace-source a{
+  color: var(--c2);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.workspace-source a:hover{
+  text-decoration: underline;
+}
+
+.workspace-credit{
+  font-size: 12px;
+  color: #475569;
+  font-weight: 500;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+/* Center description */
+/* ===== Center welcome content ===== */
+.panel-inner--centered{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Khối nội dung chính nằm giữa */
+.workspace-content{
+    font-size: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* căn giữa theo chiều dọc */
+  align-items: center;       /* căn giữa theo chiều ngang */
+  text-align: center;
+  gap: 10px;
+}
+
+/* Giữ footer luôn ở đáy */
+.workspace-footer{
+  margin-top: auto;
+}

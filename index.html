@@ -1,111 +1,127 @@
-<!DOCTYPE html>
+<!-- Setup -->
+<!doctype html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <title>Visualize Data Structure</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Structures Visualization</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
+<!-- Body -->
 <body>
-    
-    <header class="top-navbar">
-        <div class="brand">Mô Phỏng CTDL</div>
-        <nav class="nav-links">
-            <a href="#" class="nav-item active" onclick="switchTab('linkedlist', event)">DS Liên Kết</a>
-            <a href="#" class="nav-item" onclick="switchTab('stack', event)">Ngăn Xếp (Stack)</a>
-            <a href="#" class="nav-item" onclick="switchTab('queue', event)">Hàng Đợi (Queue)</a>
-            <a href="#" class="nav-item" onclick="switchTab('tree', event)">Cây (Tree)</a>
-        </nav>
+  <main class="page">
+    <!-- Background Video -->
+    <video autoplay loop muted playsinline class="bg-video">
+      <source src="material/background.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <!-- Block góc trái trên -->
+    <header class="topbar">
+      <div class="brand">
+        <img class="logo" src="material/logo-truong.png" alt="Logo trường" />
+        <div class="brand-text">
+          <div class="school-name">HO CHI MINH CITY UNIVERSITY OF TECHNOLOGY AND ENGINEERING</div>
+
+          <div class="project-info">
+            <div class="subject">Subject: Data Structures and Algorithms</div>
+            <div class="finalterm">Finalterm Project</div>
+          </div>
+
+          <div class="members">
+            Thành viên: <span>Lê Ngọc Hải</span> • <span>Lê Huy Phát</span> • <span>Lâm Quốc Trung</span>
+          </div>
+        </div>
+      </div>
     </header>
 
-    <div class="main-layout">
-        
-        <aside class="sidebar-controls">
-            <h3>Bảng Điều Khiển</h3>
-            
-            <div class="control-group">
-                <label for="value-input">Giá trị (Value):</label>
-                <input type="number" id="value-input" placeholder="Nhập số...">
+    <!-- Block giữa trình bày bài làm chính -->
+    <section class="workarea">
+      <div class="work-shell">
+        <!-- Placeholder (khi chưa chọn) -->
+        <div class="panel panel--placeholder is-active" data-panel="placeholder">
+        <div class="panel-inner panel-inner--centered">
+
+          <!-- CONTENT MENU - GIỚI THIỆU PROJECT -->
+          <div class="workspace-content">
+            <h2>WELCOME TO OUR PROJECT!</h2>
+            <p>This website provides the visualization of processes of different data structures.</p>
+            <p>There are 4 available data structures: Linked List, Stack, Queue, Binary Tree.</p>
+            <p>Choose a data structure below to visualize its structure, operations, and algorithmic behavior.</p>
+          </div>
+
+          <!-- FOOTER CHO CREDIT -->
+          <div class="workspace-footer">
+            <div class="workspace-source">
+              Background Video:
+              <a href="https://www.vecteezy.com/free-videos/aqua" target="_blank" rel="noopener">
+                https://www.vecteezy.com/free-videos/aqua
+              </a>
             </div>
 
-            <div id="controls-linkedlist" class="control-section">
-                <div class="control-group">
-                    <label>Vị trí (Index):</label>
-                    <input type="number" id="index-input" placeholder="0">
-                </div>
-                <div class="button-group">
-                    <button class="btn btn-primary">Thêm đầu (Head)</button>
-                    <button class="btn btn-primary">Thêm cuối (Tail)</button>
-                    <button class="btn btn-secondary">Thêm tại Index</button>
-                    <div class="separator"></div>
-                    <button class="btn btn-danger">Xóa đầu</button>
-                    <button class="btn btn-danger">Xóa cuối</button>
-                    <button class="btn btn-outline">Tìm kiếm</button>
-                </div>
+            <div class="workspace-credit">
+              @HCMUTE 2025 - 2026<br>
+              All copyright reserved.
             </div>
+          </div>
 
-            <div id="controls-stack" class="control-section" style="display: none;">
-                <div class="button-group">
-                    <button class="btn btn-primary">Đẩy vào (Push)</button>
-                    <button class="btn btn-danger">Lấy ra (Pop)</button>
-                    <button class="btn btn-outline">Xem đỉnh (Peek)</button>
-                    <div class="separator"></div>
-                    <button class="btn btn-secondary">Xóa hết (Clear)</button>
-                </div>
-            </div>
-
-            <div id="controls-queue" class="control-section" style="display: none;">
-                <div class="button-group">
-                    <button class="btn btn-primary">Xếp hàng (Enqueue)</button>
-                    <button class="btn btn-danger">Rời hàng (Dequeue)</button>
-                    <button class="btn btn-outline">Xem đầu (Front)</button>
-                    <div class="separator"></div>
-                    <button class="btn btn-secondary">Xóa hết (Clear)</button>
-                </div>
-            </div>
-
-             <div id="controls-tree" class="control-section" style="display: none;">
-                <div class="button-group">
-                    <button class="btn btn-primary">Thêm Node (Insert)</button>
-                    <button class="btn btn-danger">Xóa Node (Delete)</button>
-                    <button class="btn btn-outline">Tìm kiếm (Find)</button>
-                    <div class="separator"></div>
-                    <button class="btn btn-secondary">Duyệt Pre-order</button>
-                    <button class="btn btn-secondary">Duyệt In-order</button>
-                    <button class="btn btn-secondary">Duyệt Post-order</button>
-                </div>
-            </div>
-
-        </aside>
-
-        <main class="canvas-container">
-            <div id="visualization-canvas" class="view-linkedlist">
-                
-                <div class="node-wrapper">
-                    <div class="node">
-                        <div class="data">15</div>
-                        <div class="pointer">Next</div>
-                    </div>
-                    <div class="arrow">→</div>
-                </div>
-                <div class="node-wrapper">
-                    <div class="node null-node">
-                        <div class="data">NULL</div>
-                    </div>
-                </div>
-
-            </div>
-        </main>
-    </div>
-
-    <footer class="log-panel">
-        <div class="log-header">Nhật Ký Hoạt Động (Log)</div>
-        <div class="log-content" id="log-box">
-            <p class="log-entry">[Hệ thống] Đã tải mô-đun Linked List.</p>
         </div>
-    </footer>
+      </div>
+        <!-- CONTENT 1: LINKED LIST -->
+        <div class="panel" data-panel="linked-list">
+          <div class="panel-inner">
+            <button class="panel-close" type="button" aria-label="Close">×</button>
+            <h2>Linked List</h2>
+            <p>(Ô trống) Nội dung Linked List sẽ đặt ở đây.</p>
+          </div>
+        </div>
 
-    <script src="script.js"></script>
+        <!-- CONTENT 2: STACK -->
+        <div class="panel" data-panel="stack">
+          <div class="panel-inner">
+            <button class="panel-close" type="button" aria-label="Close">×</button>
+            <h2>Stack</h2>
+            <p>(Ô trống) Nội dung Stack sẽ đặt ở đây.</p>
+          </div>
+        </div>
+
+        <!-- CONTENT 3: QUEUE -->
+        <div class="panel" data-panel="queue">
+          <div class="panel-inner">
+            <button class="panel-close" type="button" aria-label="Close">×</button>
+            <h2>Queue</h2>
+            <p>(Ô trống) Nội dung Queue sẽ đặt ở đây.</p>
+          </div>
+        </div>
+
+        <!-- CONTENT 4: BINARY TREE -->
+        <div class="panel" data-panel="binary-tree">
+          <div class="panel-inner">
+            <button class="panel-close" type="button" aria-label="Close">×</button>
+            <h2>Binary Tree</h2>
+            <p>(Ô trống) Nội dung Binary Tree sẽ đặt ở đây.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Block dưới: Tên và button chọn kiểu dữ liệu -->
+    <section class="hero hero--bottom">
+      <h1 class="topic">Data Structures Visualization</h1>
+
+      <div class="ds-buttons">
+        <button class="ds-btn" data-ds="linked-list">Linked List</button>
+        <button class="ds-btn" data-ds="stack">Stack</button>
+        <button class="ds-btn" data-ds="queue">Queue</button>
+        <button class="ds-btn" data-ds="binary-tree">Binary Tree</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
 </body>
 </html>
