@@ -8,8 +8,11 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
+
+<script src="linked-list.js"></script>
+<script src="app.js"></script>
 
 <!-- Body -->
 <body>
@@ -42,41 +45,166 @@
     <!-- Block giữa trình bày bài làm chính -->
     <section class="workarea">
       <div class="work-shell">
+
         <!-- Placeholder (khi chưa chọn) -->
         <div class="panel panel--placeholder is-active" data-panel="placeholder">
-        <div class="panel-inner panel-inner--centered">
+          <div class="panel-inner panel-inner--centered">
 
-          <!-- CONTENT MENU - GIỚI THIỆU PROJECT -->
-          <div class="workspace-content">
-            <h2>WELCOME TO OUR PROJECT!</h2>
-            <p>This website provides the visualization of processes of different data structures.</p>
-            <p>There are 4 available data structures: Linked List, Stack, Queue, Binary Tree.</p>
-            <p>Choose a data structure below to visualize its structure, operations, and algorithmic behavior.</p>
+            <div class="workspace-content">
+              <h2>DATA STRUCTURES VISUALIZATION</h2>
+              <p>This website provides the visualization of processes of different data structures.</p>
+              <p>There are 4 available data structures: Linked List, Stack, Queue, Binary Tree.</p>
+            </div>
+
+            <div class="ds-select">
+              <h2 class="ds-title">Choose a data structure</h2>
+              <p class="ds-desc">
+                To visualize its structure, operations, and algorithmic behavior.
+              </p>
+
+              <div class="ds-buttons">
+                <button class="ds-btn" data-ds="linked-list">Linked List</button>
+                <button class="ds-btn" data-ds="stack">Stack</button>
+                <button class="ds-btn" data-ds="queue">Queue</button>
+                <button class="ds-btn" data-ds="binary-tree">Binary Tree</button>
+              </div>
+            </div>
+
+            <div class="workspace-footer">
+              <div class="workspace-source">
+                Background Video:
+                <a href="https://www.vecteezy.com/free-videos/aqua" target="_blank" rel="noopener">
+                  https://www.vecteezy.com/free-videos/aqua
+                </a>
+              </div>
+
+              <div class="workspace-credit">
+                @HCMUTE 2025 - 2026<br>
+                All copyright reserved.
+              </div>
+            </div>
+
           </div>
+        </div>
 
-          <!-- FOOTER CHO CREDIT -->
-          <div class="workspace-footer">
-            <div class="workspace-source">
-              Background Video:
-              <a href="https://www.vecteezy.com/free-videos/aqua" target="_blank" rel="noopener">
-                https://www.vecteezy.com/free-videos/aqua
-              </a>
+        <!-- LINKED LIST: MENU CHỌN LOẠI -->
+        <div class="panel" data-panel="linked-list-menu">
+          <div class="panel-inner panel-inner--centered">
+            <button class="panel-close" type="button" aria-label="Close">×</button>
+
+            <div class="workspace-content">
+              <h2>Linked List</h2>
+              <p>Choose a linked list type to visualize:</p>
+
+              <div class="ll-type-buttons">
+                <button class="ll-btn" data-ll="singly" type="button">Singly Linked List</button>
+                <button class="ll-btn" data-ll="doubly" type="button">Doubly Linked List</button>
+                <button class="ll-btn" data-ll="circular" type="button">Circular Linked List</button>
+              </div>
             </div>
 
-            <div class="workspace-credit">
-              @HCMUTE 2025 - 2026<br>
-              All copyright reserved.
+            <div class="workspace-footer">
+              <div class="workspace-credit">Pick one type above to continue.</div>
             </div>
+          </div>
+        </div>
+
+        <!-- LINKED LIST: SINGLY -->
+        <div class="panel" data-panel="linked-list-singly">
+          <div class="panel-inner">
+            <button class="panel-close" data-close-to="linked-list-menu" type="button" aria-label="Close">×</button>
+
+            <h2>Singly Linked List</h2>
+
+            <div class="ll-ui" data-lltype="singly">
+              <div class="ll-toolbar">
+                <input class="ll-input ll-value" type="number" placeholder="Element" />
+
+                <button class="ll-btn-op" data-op="insertTail">Insert Tail</button>
+                <button class="ll-btn-op" data-op="insertHead">Insert Head</button>
+
+                <input class="ll-input ll-index" type="number" placeholder="Index" />
+
+                <button class="ll-btn-op" data-op="insertAtIndex">Insert at Index</button>
+                <button class="ll-btn-op" data-op="deleteAtIndex">Delete at Index</button>
+
+                <button class="ll-btn-op danger" data-op="deleteTail">Delete Tail</button>
+                <button class="ll-btn-op danger" data-op="deleteHead">Delete Head</button>
+                <button class="ll-btn-op ghost" data-op="clear">Clear</button>
+              </div>
+
+              <div class="ll-status">Ready.</div>
+              <div class="ll-canvas"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- LINKED LIST: DOUBLY -->
+        <div class="panel" data-panel="linked-list-doubly">
+        <div class="panel-inner">
+          <button class="panel-close" data-close-to="linked-list-menu" type="button" aria-label="Close">×</button>
+
+          <h2>Doubly Linked List</h2>
+
+          <div class="ll-ui" data-lltype="doubly">
+            <div class="ll-toolbar">
+              <label>Element</label>
+              <input class="ll-input ll-value" type="number" placeholder="e.g. 60" />
+
+              <button class="ll-btn-op" data-op="insertTail">Insert Tail</button>
+              <button class="ll-btn-op" data-op="insertHead">Insert Head</button>
+
+              <label>Index</label>
+              <input class="ll-input ll-index" type="number" placeholder="index" />
+
+              <button class="ll-btn-op" data-op="insertAtIndex">Insert at Index</button>
+              <button class="ll-btn-op" data-op="deleteAtIndex">Delete at Index</button>
+
+              <label>Delete</label>
+              <button class="ll-btn-op danger" data-op="deleteTail">Delete Tail</button>
+              <button class="ll-btn-op danger" data-op="deleteHead">Delete Head</button>
+              <button class="ll-btn-op ghost" data-op="clear">Clear</button>
+            </div>
+
+            <div class="ll-status">Ready.</div>
+            <div class="ll-canvas"></div>
           </div>
 
         </div>
       </div>
-        <!-- CONTENT 1: LINKED LIST -->
-        <div class="panel" data-panel="linked-list">
+
+        <!-- LINKED LIST: CIRCULAR -->
+        <div class="panel" data-panel="linked-list-circular">
           <div class="panel-inner">
-            <button class="panel-close" type="button" aria-label="Close">×</button>
-            <h2>Linked List</h2>
-            <p>(Ô trống) Nội dung Linked List sẽ đặt ở đây.</p>
+            <button class="panel-close" data-close-to="linked-list-menu" type="button" aria-label="Close">×</button>
+
+            <h2>Circular Linked List</h2>
+
+            <div class="ll-ui" data-lltype="circular">
+              <div class="ll-toolbar">
+                <label>Element</label>
+                <input class="ll-input ll-value" type="number" placeholder="e.g. 60" />
+
+                <button class="ll-btn-op" data-op="insertTail">Insert Tail</button>
+                <button class="ll-btn-op" data-op="insertHead">Insert Head</button>
+
+                <label>Index</label>
+                <input class="ll-input ll-index" type="number" placeholder="index" />
+
+                <button class="ll-btn-op" data-op="insertAtIndex">Insert at Index</button>
+                <button class="ll-btn-op" data-op="deleteAtIndex">Delete at Index</button>
+
+                <label>Delete</label>
+                <button class="ll-btn-op danger" data-op="deleteTail">Delete Tail</button>
+                <button class="ll-btn-op danger" data-op="deleteHead">Delete Head</button>
+                <button class="ll-btn-op ghost" data-op="clear">Clear</button>
+              </div>
+
+              <div class="ll-status">Ready.</div>
+              <div class="ll-canvas"></div>
+            </div>
+
           </div>
         </div>
 
@@ -106,18 +234,7 @@
             <p>(Ô trống) Nội dung Binary Tree sẽ đặt ở đây.</p>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Block dưới: Tên và button chọn kiểu dữ liệu -->
-    <section class="hero hero--bottom">
-      <h1 class="topic">Data Structures Visualization</h1>
-
-      <div class="ds-buttons">
-        <button class="ds-btn" data-ds="linked-list">Linked List</button>
-        <button class="ds-btn" data-ds="stack">Stack</button>
-        <button class="ds-btn" data-ds="queue">Queue</button>
-        <button class="ds-btn" data-ds="binary-tree">Binary Tree</button>
       </div>
     </section>
   </main>

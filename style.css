@@ -106,7 +106,6 @@ body{
    MIDDLE: WORK AREA
 ========================= */
 .workarea{
-  flex: 1;                 /* ăn hết khoảng giữa */
   display: flex;
   align-items: center;     /* canh giữa theo chiều dọc */
 }
@@ -122,6 +121,10 @@ body{
   padding: 14px;
   position: relative;
   overflow: hidden;
+}
+
+.workspace-content h2{
+  font-weight: 500;   /* siêu đậm */
 }
 
 /* các panel (4 ô trống) */
@@ -140,7 +143,7 @@ body{
   border: 1px solid rgba(127, 156, 150, 0.22);
   box-shadow: 0 10px 18px rgba(15, 23, 42, 0.10);
   padding: 14px;
-  min-height: 420px;
+  min-height: 550px;
 
   display: flex;
   flex-direction: column;
@@ -192,9 +195,10 @@ body{
 
 /* 4 buttons */
 .ds-buttons{
+  margin: 18px auto 0; /* tạo khoảng cách với description */
   display: grid;
   grid-template-columns: repeat(4, minmax(160px, 1fr));
-  gap: 14px;
+  gap: 15px;
   width: min(900px, 100%);
 }
 
@@ -283,7 +287,7 @@ body{
 
 /* Sources và Credit */
 .workspace-footer{
-  margin-top: auto;            /* đẩy xuống đáy panel */
+  margin-top: 18px;            /* đẩy xuống đáy panel */
   padding-top: 12px;
   display: flex;
   flex-direction: column;
@@ -318,24 +322,244 @@ body{
 /* Center description */
 /* ===== Center welcome content ===== */
 .panel-inner--centered{
-  display: flex;
-  flex-direction: column;
+  display: grid;
   height: 100%;
+  grid-template-rows: 1fr auto 1fr;
+  align-items: center;
 }
 
 /* Khối nội dung chính nằm giữa */
 .workspace-content{
-    font-size: 20px;
-  flex: 1;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;   /* căn giữa theo chiều dọc */
-  align-items: center;       /* căn giữa theo chiều ngang */
+  justify-content: center;
+  align-items: center;
   text-align: center;
   gap: 10px;
+
+  /* QUAN TRỌNG: bỏ flex:1 đi (nó đang làm hỏng bố cục) */
+  flex: unset;
+  grid-row: 1;
+  align-self: center;
 }
 
 /* Giữ footer luôn ở đáy */
 .workspace-footer{
-  margin-top: auto;
+  grid-row: 3;
+  align-self: end;
+  margin-top: 0;
+}
+
+/* Linked List elements */
+.ll-type-buttons{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 14px;
+  width: min(900px, 100%);
+  margin-top: 10px;
+}
+
+.ll-btn{
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  cursor: pointer;
+
+  background: var(--btn);
+  color: #fff;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  transition: transform .12s ease, background-color .2s ease, box-shadow .2s ease;
+  box-shadow: 0 10px 18px rgba(27, 64, 121, 0.22);
+}
+
+.ll-btn:hover{
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(77, 124, 138, 0.25);
+}
+
+.ll-btn:active{
+  background: var(--btn-active);
+  transform: translateY(0px) scale(0.99);
+}
+
+@media (max-width: 900px){
+  .ll-type-buttons{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Linked List UI (toolbar + canvas) ===== */
+.ll-toolbar{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.12);
+}
+
+.ll-toolbar label{
+  font-weight: 800;
+  color: #0f172a;
+  opacity: 0.9;
+}
+
+.ll-input{
+  width: 120px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(15,23,42,.18);
+  background: rgba(255,255,255,.65);
+  outline: none;
+  font-weight: 700;
+}
+
+.ll-btn-op{
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: var(--btn);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.ll-btn-op:hover{ background: var(--btn-hover); }
+.ll-btn-op.danger{ background: #8b2f2f; }
+.ll-btn-op.danger:hover{ background: #a73a3a; }
+.ll-btn-op.ghost{
+  background: rgba(255,255,255,.55);
+  color: var(--c1);
+  border: 1px solid rgba(15,23,42,.14);
+}
+
+.ll-status{
+  margin-top: 10px;
+  font-weight: 700;
+  color: #0f172a;
+  opacity: .85;
+}
+
+.ll-canvas{
+  margin-top: 12px;
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.45);
+  border: 1px solid rgba(127,156,150,0.25);
+  overflow: auto;
+}
+
+.ll-info{
+  font-weight: 800;
+  color: #0f172a;
+  opacity: .75;
+  margin-bottom: 10px;
+}
+
+.ll-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ll-node{
+  min-width: 120px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(27,64,121,0.14);
+  border: 1px solid rgba(27,64,121,0.22);
+}
+
+.ll-id{
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--c1);
+  opacity: .8;
+  margin-bottom: 6px;
+}
+
+.ll-cells{
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(60px, 1fr);
+  gap: 8px;
+}
+
+.ll-cell{
+  padding: 10px 8px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 900;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.65);
+}
+
+.ll-cell--data{ }
+.ll-cell--ptr{
+  background: rgba(203,223,144,0.55);
+}
+
+.ll-arrow{
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--c1);
+  opacity: 0.7;
+}
+
+.ll-empty{
+  font-weight: 800;
+  color: #334155;
+  opacity: .8;
+}
+
+.ll-circular-hint{
+  margin-top: 10px;
+  font-weight: 800;
+  opacity: .8;
+}
+
+/* ===== Select Data Structure block ===== */
+.ds-select{
+  grid-row: 2;                 /* nằm ở hàng giữa panel */
+  justify-self: center;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Title */
+.ds-title{
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--c1);
+}
+
+/* Subtitle */
+.ds-desc{
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  max-width: 600px;
+}
+
+/* Buttons */
+.ds-buttons{
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 16px;
+  width: min(900px, 100%);
 }
