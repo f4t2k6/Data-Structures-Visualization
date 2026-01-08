@@ -1,4 +1,4 @@
-<!-- Setup -->
+<!-- ========== SETUP ========== -->
 <!doctype html>
 <html lang="vi">
 <head>
@@ -11,13 +11,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 
-<script src="linked-list.js"></script>
-<script src="app.js"></script>
-
-<!-- Body -->
+<!-- ========== BODY ========== -->
 <body>
   <main class="page">
-    <!-- Background Video -->
+    <!-- Video nền phía sau -->
     <video autoplay loop muted playsinline class="bg-video">
       <source src="material/background.mp4" type="video/mp4">
       Your browser does not support the video tag.
@@ -27,6 +24,7 @@
     <header class="topbar">
       <div class="brand">
         <img class="logo" src="material/logo-truong.png" alt="Logo trường" />
+
         <div class="brand-text">
           <div class="school-name">HO CHI MINH CITY UNIVERSITY OF TECHNOLOGY AND ENGINEERING</div>
 
@@ -46,7 +44,7 @@
     <section class="workarea">
       <div class="work-shell">
 
-        <!-- Placeholder (khi chưa chọn) -->
+        <!-- CỬA SỔ MENU -->
         <div class="panel panel--placeholder is-active" data-panel="placeholder">
           <div class="panel-inner panel-inner--centered">
 
@@ -58,6 +56,7 @@
 
             <div class="ds-select">
               <h2 class="ds-title">Choose a data structure</h2>
+
               <p class="ds-desc">
                 To visualize its structure, operations, and algorithmic behavior.
               </p>
@@ -71,12 +70,7 @@
             </div>
 
             <div class="workspace-footer">
-              <div class="workspace-source">
-                Background Video:
-                <a href="https://www.vecteezy.com/free-videos/aqua" target="_blank" rel="noopener">
-                  https://www.vecteezy.com/free-videos/aqua
-                </a>
-              </div>
+              <div class="workspace-source"></div>
 
               <div class="workspace-credit">
                 @HCMUTE 2025 - 2026<br>
@@ -87,7 +81,7 @@
           </div>
         </div>
 
-        <!-- LINKED LIST: MENU CHỌN LOẠI -->
+        <!-- CỬA SỔ 1 LINKED LIST: CHỌN LOẠI LINKED LIST -->
         <div class="panel" data-panel="linked-list-menu">
           <div class="panel-inner panel-inner--centered">
             <button class="panel-close" type="button" aria-label="Close">×</button>
@@ -109,7 +103,7 @@
           </div>
         </div>
 
-        <!-- LINKED LIST: SINGLY -->
+        <!-- CỬA SỔ CON SINGLY LINKED LIST -->
         <div class="panel" data-panel="linked-list-singly">
           <div class="panel-inner">
             <button class="panel-close" data-close-to="linked-list-menu" type="button" aria-label="Close">×</button>
@@ -140,41 +134,41 @@
           </div>
         </div>
 
-        <!-- LINKED LIST: DOUBLY -->
+        <!-- CỬA SỔ CON DOUBLY LINKED LIST -->
         <div class="panel" data-panel="linked-list-doubly">
-        <div class="panel-inner">
-          <button class="panel-close" data-close-to="linked-list-menu" type="button" aria-label="Close">×</button>
+          <div class="panel-inner">
+            <button class="panel-close" data-close-to="linked-list-menu" type="button" aria-label="Close">×</button>
 
-          <h2>Doubly Linked List</h2>
+            <h2>Doubly Linked List</h2>
 
-          <div class="ll-ui" data-lltype="doubly">
-            <div class="ll-toolbar">
-              <label>Element</label>
-              <input class="ll-input ll-value" type="number" placeholder="e.g. 60" />
+            <div class="ll-ui" data-lltype="doubly">
+              <div class="ll-toolbar">
+                <label>Element</label>
+                <input class="ll-input ll-value" type="number" placeholder="e.g. 60" />
 
-              <button class="ll-btn-op" data-op="insertTail">Insert Tail</button>
-              <button class="ll-btn-op" data-op="insertHead">Insert Head</button>
+                <button class="ll-btn-op" data-op="insertTail">Insert Tail</button>
+                <button class="ll-btn-op" data-op="insertHead">Insert Head</button>
 
-              <label>Index</label>
-              <input class="ll-input ll-index" type="number" placeholder="index" />
+                <label>Index</label>
+                <input class="ll-input ll-index" type="number" placeholder="index" />
 
-              <button class="ll-btn-op" data-op="insertAtIndex">Insert at Index</button>
-              <button class="ll-btn-op" data-op="deleteAtIndex">Delete at Index</button>
+                <button class="ll-btn-op" data-op="insertAtIndex">Insert at Index</button>
+                <button class="ll-btn-op" data-op="deleteAtIndex">Delete at Index</button>
 
-              <label>Delete</label>
-              <button class="ll-btn-op danger" data-op="deleteTail">Delete Tail</button>
-              <button class="ll-btn-op danger" data-op="deleteHead">Delete Head</button>
-              <button class="ll-btn-op ghost" data-op="clear">Clear</button>
+                <label>Delete</label>
+                <button class="ll-btn-op danger" data-op="deleteTail">Delete Tail</button>
+                <button class="ll-btn-op danger" data-op="deleteHead">Delete Head</button>
+                <button class="ll-btn-op ghost" data-op="clear">Clear</button>
+              </div>
+
+              <div class="ll-status">Ready.</div>
+              <div class="ll-canvas"></div>
             </div>
 
-            <div class="ll-status">Ready.</div>
-            <div class="ll-canvas"></div>
           </div>
-
         </div>
-      </div>
 
-        <!-- LINKED LIST: CIRCULAR -->
+        <!-- CỬA SỔ CON CIRCULAR LINKED LIST -->
         <div class="panel" data-panel="linked-list-circular">
           <div class="panel-inner">
             <button class="panel-close" data-close-to="linked-list-menu" type="button" aria-label="Close">×</button>
@@ -208,16 +202,31 @@
           </div>
         </div>
 
-        <!-- CONTENT 2: STACK -->
+        <!-- CỬA SỔ 2: STACK -->
         <div class="panel" data-panel="stack">
           <div class="panel-inner">
             <button class="panel-close" type="button" aria-label="Close">×</button>
+
             <h2>Stack</h2>
-            <p>(Ô trống) Nội dung Stack sẽ đặt ở đây.</p>
+
+            <!-- GIỮ BỐ CỤC GIỐNG LINKED LIST: toolbar + status + canvas -->
+            <div class="stack-ui">
+              <div class="ll-toolbar">
+                <label>Element</label>
+                <input class="ll-input stack-value" type="number" placeholder="e.g. 10" />
+
+                <button class="ll-btn-op stack-btn-op" data-op="push" type="button">Push</button>
+                <button class="ll-btn-op danger stack-btn-op" data-op="pop" type="button">Pop</button>
+              </div>
+
+              <div class="ll-status stack-status">Ready.</div>
+              <div class="ll-canvas stack-canvas"></div>
+            </div>
+
           </div>
         </div>
 
-        <!-- CONTENT 3: QUEUE -->
+        <!-- CỬA SỔ 3: QUEUE -->
         <div class="panel" data-panel="queue">
           <div class="panel-inner">
             <button class="panel-close" type="button" aria-label="Close">×</button>
@@ -226,7 +235,7 @@
           </div>
         </div>
 
-        <!-- CONTENT 4: BINARY TREE -->
+        <!-- CỬA SỔ 4: BINARY TREE -->
         <div class="panel" data-panel="binary-tree">
           <div class="panel-inner">
             <button class="panel-close" type="button" aria-label="Close">×</button>
@@ -239,6 +248,9 @@
     </section>
   </main>
 
+  <!-- IMPORTANT: script order -->
+  <script src="linked-list.js"></script>
+  <script src="stack.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -563,3 +563,63 @@ body{
   gap: 16px;
   width: min(900px, 100%);
 }
+
+/* =========================
+   STACK UI (added - safe)
+   (Does not affect Linked List)
+========================= */
+.stack-canvas{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stack-info{
+  font-weight: 900;
+  color: #0f172a;
+  opacity: .75;
+}
+
+.stack-col{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.stack-top-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  color: var(--c1);
+  background: rgba(27,64,121,0.10);
+  border: 1px solid rgba(27,64,121,0.18);
+}
+
+.stack-item{
+  min-width: 220px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(27,64,121,0.14);
+  border: 1px solid rgba(27,64,121,0.22);
+}
+
+.stack-item__id{
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--c1);
+  opacity: .8;
+  margin-bottom: 6px;
+}
+
+.stack-item__val{
+  padding: 10px 8px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 900;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.65);
+}

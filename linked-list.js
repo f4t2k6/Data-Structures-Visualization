@@ -11,11 +11,8 @@
     };
   }
 
-  /* =======================
-     SINGLY (head only)
-  ======================= */
-
-  // Node nhận id từ list (không tự sinh id nữa)
+  // ===== SINGLY LINKED LIST =====
+  // Node nhận id từ list
   function snode(id, value) {
     this.id = id;
     this.value = value;
@@ -36,7 +33,7 @@
     return id;
   };
 
-  // ---- render / check helpers ----
+  // render / check helpers
   singlyll.prototype.clear = function () {
     var steps = [];
     steps.push(step("start", "clear()", this));
@@ -44,7 +41,7 @@
     this.head = null;
     this.size = 0;
 
-    // RESET ID riêng của singly
+    // Reset ID riêng của singly linked list
     this._id = 1;
 
     steps.push(step("done", "cleared + reset id", this));
@@ -115,7 +112,7 @@
     };
   };
 
-  // ---- internal traversal helpers ----
+  // internal traversal helpers
   singlyll.prototype._getnode = function (index, steps) {
     var cur = this.head;
     var i = 0;
@@ -142,7 +139,7 @@
     return cur;
   };
 
-  // ---- required ops ----
+  // required ops
   singlyll.prototype.insertHead = function (value) {
     var steps = [];
     steps.push(step("start", "insertHead(" + value + ")", this));
@@ -274,16 +271,14 @@
     return steps;
   };
 
-  // aliases (backward-compatible)
+  // aliases
   singlyll.prototype.insertAt = singlyll.prototype.insertAtIndex;
   singlyll.prototype.removeAt = singlyll.prototype.deleteAtIndex;
   singlyll.prototype.insertat = singlyll.prototype.insertAtIndex;
   singlyll.prototype.removeat = singlyll.prototype.deleteAtIndex;
 
-  /* =======================
-     DOUBLY (3 cells: prev|data|next)
-  ======================= */
 
+  // ===== DOUBLY LINKED LIST =====
   function dnode(id, value) {
     this.id = id;
     this.value = value;
@@ -306,7 +301,7 @@
     return id;
   };
 
-  // ---- render / check helpers ----
+  // render / check helpers
   doublyll.prototype.clear = function () {
     var steps = [];
     steps.push(step("start", "clear()", this));
@@ -414,7 +409,7 @@
     }
   };
 
-  // ---- required ops ----
+  // required ops
   doublyll.prototype.insertHead = function (value) {
     var steps = [];
     steps.push(step("start", "insertHead(" + value + ")", this));
@@ -567,15 +562,13 @@
     return steps;
   };
 
-  // aliases (backward-compatible)
+  // aliases
   doublyll.prototype.insertAt = doublyll.prototype.insertAtIndex;
   doublyll.prototype.removeAt = doublyll.prototype.deleteAtIndex;
   doublyll.prototype.insertat = doublyll.prototype.insertAtIndex;
   doublyll.prototype.removeat = doublyll.prototype.deleteAtIndex;
 
-  /* =======================
-     CIRCULAR (singly)
-  ======================= */
+  // ===== CIRCULAR LINKED LIST =====
 
   function cnode(id, value) {
     this.id = id;
@@ -598,7 +591,7 @@
     return id;
   };
 
-  // ---- render / check helpers ----
+  // render / check helpers
   circularll.prototype.clear = function () {
     var steps = [];
     steps.push(step("start", "clear()", this));
@@ -688,7 +681,7 @@
     };
   };
 
-  // invariant check (anti-freeze)
+  // invariant check - để tránh đóng băng chương trình
   circularll.prototype.validateInvariant = function () {
     if (this.size === 0) return this.head === null && this.tail === null;
     if (!this.head || !this.tail) return false;
@@ -712,7 +705,7 @@
     return cur;
   };
 
-  // ---- required ops ----
+  // required ops
   circularll.prototype.insertHead = function (value) {
     var steps = [];
     steps.push(step("start", "insertHead(" + value + ")", this));

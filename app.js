@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showPanel("placeholder");
   }
 
-  // ============ NAV (bottom buttons) ============
+  // CÁC NÚT LỰA CHỌN KIỂU DỮ LIỆU
   btns.forEach(btn => {
     btn.addEventListener("click", () => {
       const key = btn.dataset.ds;
@@ -33,15 +33,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // pick LL type in menu
+  // CỬA SỔ CHỌN LOẠI LINKED LIST
   document.addEventListener("click", (e) => {
     const pick = e.target.closest("[data-ll]");
     if (!pick) return;
-    const type = pick.dataset.ll; // singly | doubly | circular
+    const type = pick.dataset.ll; // singly - doubly - circular
     showPanel("linked-list-" + type);
   });
 
-  // close buttons
+  // NÚT ĐÓNG CỬA SỔ
   document.addEventListener("click", (e) => {
     const x = e.target.closest(".panel-close");
     if (!x) return;
@@ -55,18 +55,168 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ============ LINKED LIST UI ============
+  // GIAO DIỆN LINKED LIST
   const llUIs = new Map(); // key(panelKey) -> controller
 
+  // =========================
+  // STACK UI (single stack)
+  // =========================
+  let stackController = null;
+
+  function initStackOnce() {
+    if (stackController) return;
+
+    if (!window.dsbrain || !window.dsbrain.stack) {
+      throw new Error("dsbrain.stack not found. Did you include stack.js before app.js?");
+    }
+
+    const panelEl = document.querySelector(`.panel[data-panel="stack"]`);
+    if (!panelEl) return;
+
+    const uiRoot = panelEl.querySelector(".stack-ui");
+    if (!uiRoot) return;
+
+    const valueInput = uiRoot.querySelector(".stack-value");
+    const statusEl = uiRoot.querySelector(".stack-status");
+    const canvasEl = uiRoot.querySelector(".stack-canvas");
+
+    const st = new window.dsbrain.stack();
+
+    stackController = {
+      st,
+      uiRoot,
+      valueInput,
+      statusEl,
+      canvasEl,
+
+      setStatus(msg) {
+        if (this.statusEl) this.statusEl.textContent = msg || "Ready.";
+      },
+
+      getValue() {
+        const raw = (this.valueInput && this.valueInput.value != null)
+          ? String(this.valueInput.value).trim()
+          : "";
+        if (raw === "") return null;
+        const v = Number(raw);
+        if (Number.isNaN(v)) return null;
+        return v;
+      },
+
+      run(op) {
+        let steps = null;
+
+        try {
+          if (op === "push") {
+            const v = this.getValue();
+            if (v == null) return this.setStatus("⚠️ Please enter Element.");
+            steps = this.st.push(v);
+          } else if (op === "pop") {
+            steps = this.st.pop();
+          } else {
+            return this.setStatus("⚠️ Unknown op: " + op);
+          }
+        } catch (err) {
+          this.setStatus("❌ Error: " + (err && err.message ? err.message : String(err)));
+          return;
+        }
+
+        if (Array.isArray(steps) && steps.length) {
+          const last = steps[steps.length - 1];
+          this.setStatus(last.message || "Done.");
+        } else {
+          this.setStatus("Done.");
+        }
+
+        this.render();
+      },
+
+      render() {
+        if (!this.canvasEl) return;
+
+        const snap = this.st.snapshot();
+
+        this.canvasEl.innerHTML = "";
+
+        const info = document.createElement("div");
+        info.className = "stack-info";
+        info.textContent = `count=${snap.count}` + (snap.topId != null ? `, top=${snap.topId}` : "");
+        this.canvasEl.appendChild(info);
+
+        const col = document.createElement("div");
+        col.className = "stack-col";
+        this.canvasEl.appendChild(col);
+
+        if (!snap.nodes || snap.nodes.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "ll-empty";
+          empty.textContent = "Empty stack";
+          col.appendChild(empty);
+          return;
+        }
+
+        const topBadge = document.createElement("div");
+        topBadge.className = "stack-top-badge";
+        topBadge.textContent = "TOP";
+        col.appendChild(topBadge);
+
+        // snapshot nodes: from top -> bottom
+        for (let i = 0; i < snap.nodes.length; i++) {
+          const n = snap.nodes[i];
+
+          const item = document.createElement("div");
+          item.className = "stack-item";
+
+          const idTag = document.createElement("div");
+          idTag.className = "stack-item__id";
+          idTag.textContent = "#" + n.id;
+
+          const valTag = document.createElement("div");
+          valTag.className = "stack-item__val";
+          valTag.textContent = String(n.value);
+
+          item.appendChild(idTag);
+          item.appendChild(valTag);
+          col.appendChild(item);
+        }
+      }
+    };
+
+    // Bind buttons inside stack UI only
+    uiRoot.addEventListener("click", (e) => {
+      const b = e.target.closest(".stack-btn-op");
+      if (!b) return;
+      const op = b.dataset.op;
+      stackController.run(op);
+    });
+
+    // Enter => push
+    if (valueInput) {
+      valueInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") stackController.run("push");
+      });
+    }
+
+    stackController.setStatus("Ready.");
+    stackController.render();
+  }
+
   function afterPanelShown(panelKey) {
-    // only init when panel is LL type panel
+    // ===== STACK panel init/render =====
+    if (panelKey === "stack") {
+      initStackOnce();
+      if (stackController) stackController.render();
+      return;
+    }
+
+    // Chỉ khởi tạo khi cửa sổ được mở là của Linked List
     if (
       panelKey !== "linked-list-singly" &&
       panelKey !== "linked-list-doubly" &&
       panelKey !== "linked-list-circular"
     ) return;
 
-    // init once per panel
+    // Khởi tạo 1 lần mỗi cửa sổ
     if (llUIs.has(panelKey)) {
       llUIs.get(panelKey).render();
       return;
@@ -84,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const statusEl = uiRoot.querySelector(".ll-status");
     const canvasEl = uiRoot.querySelector(".ll-canvas");
 
-    // create list instance
+    // Khởi tạo đối tượng Linked List
     const list = createListByType(type);
 
     const controller = {
@@ -117,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
 
       run(op) {
-        // No animation for now: just run op and render final state
+        // Chưa có animation, chỉ có toán tử và render kết quả cuối cùng
         let steps = null;
 
         try {
@@ -160,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // status from last step if exists
+        // Lưu lại trạng thái của List ở bước trước đó (nếu có)
         if (Array.isArray(steps) && steps.length) {
           const last = steps[steps.length - 1];
           this.setStatus(last.message || "Done.");
@@ -171,14 +321,15 @@ document.addEventListener("DOMContentLoaded", () => {
         this.render();
       },
 
+      // Hàm render, vẽ ra trong cửa sổ Linked List
       render() {
         if (!this.canvasEl) return;
         const snap = this.list.snapshot();
 
-        // clear
+        // Nút clear
         this.canvasEl.innerHTML = "";
 
-        // header small info
+        // Header nhỏ cho phần thông tin
         const info = document.createElement("div");
         info.className = "ll-info";
         info.textContent =
@@ -187,7 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
           (snap.tailid != null ? `, tail=${snap.tailid}` : "");
         this.canvasEl.appendChild(info);
 
-        // row
+        // Hàng
         const row = document.createElement("div");
         row.className = "ll-row";
         this.canvasEl.appendChild(row);
@@ -203,22 +354,23 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = 0; i < snap.nodes.length; i++) {
           const n = snap.nodes[i];
 
-          // node box
+          // Hộp Node cho mỗi phần tử
           const nodeEl = document.createElement("div");
           nodeEl.className = "ll-node";
 
-          // label id (small)
+          // ID cho mỗi Node
           const idTag = document.createElement("div");
           idTag.className = "ll-id";
           idTag.textContent = "#" + n.id;
           nodeEl.appendChild(idTag);
 
-          // cells
+          // 1 Cell trong mỗi Node
           const cellsEl = document.createElement("div");
           cellsEl.className = "ll-cells";
 
           if (snap.type === "doubly") {
-            // 3 cells prev|data|next (use snapshot.cells if available)
+
+            // 3 cells trong Node [prev|data|next] nếu là Doubly Linked List
             const prevCell = document.createElement("div");
             prevCell.className = "ll-cell ll-cell--ptr";
             prevCell.textContent = (n.previd == null) ? "null" : String(n.previd);
@@ -235,7 +387,7 @@ document.addEventListener("DOMContentLoaded", () => {
             cellsEl.appendChild(dataCell);
             cellsEl.appendChild(nextCell);
           } else {
-            // 2 cells data|next
+            // 3 cells trong Node [data|next] nếu là những loại khác Linked List
             const dataCell = document.createElement("div");
             dataCell.className = "ll-cell ll-cell--data";
             dataCell.textContent = String(n.value);
@@ -251,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
           nodeEl.appendChild(cellsEl);
           row.appendChild(nodeEl);
 
-          // arrow between nodes
+          // Mũi tên giữa các Node
           if (i < snap.nodes.length - 1) {
             const arrow = document.createElement("div");
             arrow.className = "ll-arrow";
@@ -260,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        // circular hint
+        // Kiểm tra có đúng dạng Circular Linked List (tail->next = head) hay không
         if (snap.type === "circular" && snap.size > 0) {
           const hint = document.createElement("div");
           hint.className = "ll-circular-hint";
@@ -270,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    // bind toolbar buttons inside this panel only
+    // Liên kết tất cả các nút giới hạn trong 1 cửa sổ
     uiRoot.addEventListener("click", (e) => {
       const b = e.target.closest(".ll-btn-op");
       if (!b) return;
@@ -278,7 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
       controller.run(op);
     });
 
-    // quick enter: press Enter in value -> insertTail
+    // Thêm nút "Enter" để Insert Tail
     if (valueInput) {
       valueInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") controller.run("insertTail");
@@ -306,6 +458,6 @@ document.addEventListener("DOMContentLoaded", () => {
     throw new Error("Unknown ll type: " + type);
   }
 
-  // default
+  // Default
   showWorkspace();
 });
