@@ -1,7 +1,6 @@
-/* Theme theo palette:
-   #1B4079  #4D7C8A  #7F9C96  #8FAD88  #CBDF90 */
 
 :root{
+  /* Palette màu */
   --c1: #1B4079; /* primary */
   --c2: #4D7C8A; /* secondary */
   --c3: #7F9C96; /* neutral */
@@ -33,7 +32,7 @@ body{
   min-height: 100vh;
 }
 
-/* background video (tách ra class cho gọn) */
+/* background video */
 .bg-video{
   position: fixed;
   top: 0; left: 0;
@@ -47,7 +46,7 @@ body{
   margin: 0 auto;
   padding: 24px 0 20px;
 
-  /* quan trọng: chia layout TOP / MIDDLE / BOTTOM */
+  /* chia layout TOP / MIDDLE / BOTTOM */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -456,11 +455,45 @@ body{
   overflow: auto;
 }
 
+/* ===== Circular arrow overlay ===== */
+.ll-canvas--rel{
+  position: relative; /* để svg overlay bám theo */
+}
+
+/* svg phủ lên nội dung canvas, không chặn click */
+.ll-circular-svg{
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+
+/* đường mũi tên */
+.ll-circular-svg__path{
+  fill: none;
+  stroke: rgba(27, 64, 121, 0.75);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* đầu mũi tên */
+.ll-circular-svg__head{
+  fill: rgba(27, 64, 121, 0.75);
+}
+
 .ll-info{
   font-weight: 800;
   color: #0f172a;
   opacity: .75;
   margin-bottom: 10px;
+}
+
+/* chừa chỗ dưới để vẽ mũi tên vòng ngoài */
+.ll-circular-spacer{
+  height: 60px;
 }
 
 .ll-row{
@@ -477,6 +510,52 @@ body{
   background: rgba(27,64,121,0.14);
   border: 1px solid rgba(27,64,121,0.22);
 }
+
+/* Animation cho Linked List */
+.ll-node{
+  will-change: transform, opacity;
+  transform-origin: center;
+}
+
+/* Pop-in node mới */
+.ll-node.is-enter{
+  opacity: 0;
+  transform: scale(0.6) translateY(-8px);
+}
+
+/* Pop-out node cũ */
+.ll-node.is-leave{
+  opacity: 0;
+  transform: scale(0.75) translateY(8px);
+}
+
+/* Đang có animation thì tránh spam click */
+.ll-ui.is-busy .ll-btn-op{
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Highlight khi duyệt node */
+.ll-node.is-hl{
+  border-color: rgba(27, 64, 121, 0.65);
+  box-shadow: 0 10px 18px rgba(27,64,121,0.18);
+  transform: scale(1.03);
+}
+
+.ll-node.is-hl .ll-cell--data{
+  outline: 2px solid rgba(27, 64, 121, 0.55);
+}
+
+@keyframes llPulse{
+  0%{ transform: scale(1.00); }
+  50%{ transform: scale(1.05); }
+  100%{ transform: scale(1.00); }
+}
+
+.ll-node.is-pulse{
+  animation: llPulse .35s ease;
+}
+
 
 .ll-id{
   font-size: 12px;
