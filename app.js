@@ -1,16 +1,23 @@
-// LOGIC CHO CÁC ELEMENTS VÀ UI TRONG CỬA SỔ
+//  APP.JS: UI CONTROLLER
+//  - Điều hướng các cửa sổ của các cấu trúc dữ liệu
+//  - Khởi tạo UI và chạy / quản lý các bước UI cho LinkedList, Stack, Queue, BinaryTree
+//  - Chạy từng bước + animation của node + log text trạng thái từng bước của operation.
+
 
 document.addEventListener("DOMContentLoaded", () => {
-  // CẤU TRÚC DỮ LIỆU
-  // Button
+
+
+  // PHẦN ĐIỀU HƯỚNG
+  // - Điều hướng menu chính
+  // - Quản lý ẩn / hiện các cửa sổ
+  // - Giữ trạng thái cửa sổ đang active
+  
   const btns = document.querySelectorAll(".ds-btn");
-  // Cửa sổ - panel
   const panels = document.querySelectorAll(".panel");
 
-  // Lưu lại panel nào đang được mở
   let activePanelKey = "placeholder";
 
-  // Bật tắt trạng thái Active cửa sổ
+  // Bật / tắt trạng thái active của menu button
   function setActiveButton(keyOrNull) {
     btns.forEach(b => b.classList.toggle("active", b.dataset.ds === keyOrNull));
   }
@@ -28,24 +35,23 @@ document.addEventListener("DOMContentLoaded", () => {
     showPanel("placeholder");
   }
 
-  // CÁC NÚT LỰA CHỌN KIỂU DỮ LIỆU
+
+  // LINKED LIST SUB-MENU
+  // - Chọn loại Linked List: Singly, Doubly, Circular
   btns.forEach(btn => {
     btn.addEventListener("click", () => {
       const key = btn.dataset.ds;
       setActiveButton(key);
 
-      // Linked List có menu con chọn singly/doubly/circular
       if (key === "linked-list") {
         showPanel("linked-list-menu");
         return;
       }
 
-      // Kiểu dữ liệu khác thì mở thẳng cửa sổ chính
       showPanel(key);
     });
   });
 
-  // CỬA SỔ CHỌN LOẠI LINKED LIST
   document.addEventListener("click", (e) => {
     const pick = e.target.closest("[data-ll]");
     if (!pick) return;
@@ -54,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showPanel("linked-list-" + type);
   });
 
-  // NÚT ĐÓNG CỬA SỔ
+  // Nút đóng cửa sổ
   document.addEventListener("click", (e) => {
     const x = e.target.closest(".panel-close");
     if (!x) return;
@@ -68,35 +74,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // GIAO DIỆN LINKED LIST
-  const llUIs = new Map();
 
-  // UI CHO STACK
-  let stackController = null;
+  // LƯU LẠI UI ĐỂ CHỈ INIT 1 LẦN
+  const llUIs = new Map();  // Linked List
+  let stackController = null;  // Stack
+  let queueController = null;  // Queue
+  let treeController = null;  // Binary Tree
 
-  // Khởi tạo stack UI
+
+  // STACK UI
+  // - Init UI Stack 1 lần
+  // - Render kết quả operation + animation
+  // - Các nút chức năng: push - pop - clear
   function initStackOnce() {
     if (stackController) return;
 
-    // Kiểm tra import stack.js
     if (!window.dsbrain || !window.dsbrain.stack) {
       throw new Error("dsbrain.stack not found. Did you include stack.js before app.js?");
     }
 
-    // Cửa sổ cho stack
     const panelEl = document.querySelector(`.panel[data-panel="stack"]`);
     if (!panelEl) return;
 
-    // UI stack trong cửa sổ
     const uiRoot = panelEl.querySelector(".stack-ui");
     if (!uiRoot) return;
 
-    // Lấy elements trong UI
     const valueInput = uiRoot.querySelector(".stack-value");
     const statusEl = uiRoot.querySelector(".stack-status");
     const canvasEl = uiRoot.querySelector(".stack-canvas");
 
-    // Tạo đối tượng stack logic
     const st = new window.dsbrain.stack();
 
     stackController = {
@@ -106,15 +112,16 @@ document.addEventListener("DOMContentLoaded", () => {
       statusEl,
       canvasEl,
 
+      // Animation & trạng thái UI
       animating: false,
       STEP_DELAY: 900,
       sleep(ms){ return new Promise(r => setTimeout(r, ms)); },
-
       setBusy(isBusy){
         this.animating = !!isBusy;
         if (this.uiRoot) this.uiRoot.classList.toggle("is-busy", !!isBusy);
       },
 
+      // Render
       renderFromSnapshot(snap, highlightIds = []){
         if (!this.canvasEl) return;
 
@@ -167,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       },
 
+      // Animation hỗ trợ
       captureItemRects(){
         const map = new Map();
         if (!this.canvasEl) return map;
@@ -226,7 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setStatus(msg, mode = "append") {
         if (!this.statusEl) return;
 
-        // mode: "append" | "replace" | "clear"
         if (mode === "clear") {
           this.statusEl.textContent = "";
           return;
@@ -237,7 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // append (mặc định)
         const line = msg || "";
         if (this.statusEl.textContent.trim() === "") {
           this.statusEl.textContent = line;
@@ -245,7 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
           this.statusEl.textContent += "\n" + line;
         }
 
-        // auto scroll xuống cuối (nếu statusEl có scroll)
         this.statusEl.scrollTop = this.statusEl.scrollHeight;
       },
 
@@ -260,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return v;
       },
 
-      // Thao tác push / pop, sau thao tác phải render lại
+      // Điều khiển thao tác
       async run(op){
         if (this.animating) return;
 
@@ -271,14 +276,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
           if (op === "push") {
             const v = this.getValue();
-            if (v == null) { this.setStatus("⚠️ Please enter Element.", "replace"); return; }
+            if (v == null) { this.setStatus("Please enter an integer!", "replace"); return; }
             steps = this.st.push(v);
           } else if (op === "pop") {
             steps = this.st.pop();
           } else if (op === "clear") {
             steps = this.st.clear();
           } else {
-            this.setStatus("Unknown op: " + op, "replace");
+            this.setStatus("Unknown operation: " + op, "replace");
             return;
           }
 
@@ -288,22 +293,19 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
-          // step 0
           let prevSnap = steps[0].state;
           this.setStatus(this.formatStepMessage(steps[0]), "append");
           this.renderFromSnapshot(prevSnap, steps[0].highlight || []);
           await this.sleep(this.STEP_DELAY);
 
-          // chạy từng step
           for (let i = 1; i < steps.length; i++){
             const s = steps[i];
             const nextSnap = s.state;
             const hl = (s.highlight || []).map(x => String(x));
 
             this.setStatus(this.formatStepMessage(s), "append");
-            // REMOVE: pop-out trước (nếu có node bị xóa)
+            // REMOVE
             if (s.action === "remove") {
-              // node bị xóa là node tồn tại ở prevSnap nhưng không còn ở nextSnap
               const d = this.diffIds(prevSnap, nextSnap);
               if (d.removedId && this.canvasEl) {
                 const el = this.canvasEl.querySelector(`.stack-item[data-sid="${d.removedId}"]`);
@@ -314,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             }
 
-            // CLEAR: pop-out toàn bộ node hiện đang có trước khi render state rỗng
+            // CLEAR
             if (s.action === "clear") {
               if (this.canvasEl) {
                 const all = this.canvasEl.querySelectorAll(".stack-item[data-sid]");
@@ -323,16 +325,12 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             }
 
-            // capture rect để FLIP
+            // FLIP
             const oldRects = this.captureItemRects();
-
-            // render theo state mới + highlight
             this.renderFromSnapshot(nextSnap, hl);
-
-            // FLIP shift
             this.playFLIP(oldRects, 500);
 
-            // INSERT: pop-in node mới
+            // INSERT
             if (s.action === "insert") {
               const d = this.diffIds(prevSnap, nextSnap);
               if (d.insertedId && this.canvasEl) {
@@ -356,9 +354,9 @@ document.addEventListener("DOMContentLoaded", () => {
       render() {
         if (!this.canvasEl) return;
 
-        const snap = this.st.snapshot(); // chụp trạng thái stack hiện tại
+        const snap = this.st.snapshot();
 
-        this.canvasEl.innerHTML = ""; // clear canvas
+        this.canvasEl.innerHTML = "";
 
         // Thông tin
         const info = document.createElement("div");
@@ -371,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
         col.className = "stack-col";
         this.canvasEl.appendChild(col);
 
-        // Không có node => stack rỗng
+        // Không có node thì stack rỗng
         if (!snap.nodes || snap.nodes.length === 0) {
           const empty = document.createElement("div");
           empty.className = "ll-empty";
@@ -390,21 +388,19 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let i = 0; i < snap.nodes.length; i++) {
           const n = snap.nodes[i];
 
-          // 1 item stack
           const item = document.createElement("div");
           item.className = "stack-item";
 
-          // tag id
+          // ID
           const idTag = document.createElement("div");
           idTag.className = "stack-item__id";
           idTag.textContent = "#" + n.id;
 
-          // tag value
+          // Value
           const valTag = document.createElement("div");
           valTag.className = "stack-item__val";
           valTag.textContent = String(n.value);
 
-          // gắn vào item rồi đưa lên cột
           item.appendChild(idTag);
           item.appendChild(valTag);
           col.appendChild(item);
@@ -412,35 +408,614 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    // Button UI cho cửa số Stack
+
+    // QUEUE UI 
+    // - Tương tự Stack nhưng hiển thị dạng hàng ngang
+    // - Button làm việc với enqueue / dequeue
+
     uiRoot.addEventListener("click", (e) => {
       const b = e.target.closest(".stack-btn-op");
       if (!b) return;
-      const op = b.dataset.op;                     // push/pop
-      stackController.run(op);                     // chạy op
+      const op = b.dataset.op;
+      stackController.run(op);
     });
 
-    // Nhấn Enter => push
     if (valueInput) {
       valueInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") stackController.run("push");
       });
     }
 
-    // Clear về trạng thái ban đầu
+    // Clear
     stackController.setStatus("Ready.");
     stackController.render();
   }
 
+  // Khởi tạo queue UI
+  function initQueueOnce() {
+    if (queueController) return;
+
+    // Kiểm tra import queue.js
+    if (!window.dsbrain || !window.dsbrain.queue) {
+      throw new Error("dsbrain.queue not found. Did you include queue.js before app.js?");
+    }
+
+    const panelEl = document.querySelector(`.panel[data-panel="queue"]`);
+    if (!panelEl) return;
+
+    const uiRoot = panelEl.querySelector(".queue-ui");
+    if (!uiRoot) return;
+
+    const valueInput = uiRoot.querySelector(".queue-value");
+    const statusEl = uiRoot.querySelector(".queue-status");
+    const canvasEl = uiRoot.querySelector(".queue-canvas");
+
+    const q = new window.dsbrain.queue();
+
+    queueController = {
+      q,
+      uiRoot,
+      valueInput,
+      statusEl,
+      canvasEl,
+
+      // Animation & UI
+      animating: false,
+      STEP_DELAY: 900,
+      sleep(ms){ return new Promise(r => setTimeout(r, ms)); },
+      setBusy(isBusy){
+        this.animating = !!isBusy;
+        if (this.uiRoot) this.uiRoot.classList.toggle("is-busy", !!isBusy);
+      },
+
+      // Text trạng thái
+      setStatus(msg, mode = "append"){
+        if (!this.statusEl) return;
+
+        if (mode === "clear") { this.statusEl.textContent = ""; return; }
+        if (mode === "replace") { this.statusEl.textContent = msg || ""; return; }
+
+        const line = msg || "";
+        if (this.statusEl.textContent.trim() === "") this.statusEl.textContent = line;
+        else this.statusEl.textContent += "\n" + line;
+
+        this.statusEl.scrollTop = this.statusEl.scrollHeight;
+      },
+
+      getValue(){
+        const raw = (this.valueInput && this.valueInput.value != null)
+          ? String(this.valueInput.value).trim()
+          : "";
+        if (raw === "") return null;
+        const v = Number(raw);
+        if (Number.isNaN(v)) return null;
+        return v;
+      },
+
+      formatStepMessage(stepObj){
+        const a = String(stepObj?.action || "").toLowerCase();
+        const m = String(stepObj?.message || "").toUpperCase();
+        const hl = (stepObj?.highlight || []).map(x => String(x));
+        const hlText = hl.length ? ` [NODE ${hl.join(", ")}]` : "";
+
+        if (a === "start") return `START: ${m}${hlText}`;
+        if (a === "check") return `CHECK: ${m}${hlText}`;
+        if (a === "create") return `CREATE: ${m}${hlText}`;
+        if (a === "link") return `LINK: ${m}${hlText}`;
+        if (a === "select") return `SELECT: ${m}${hlText}`;
+        if (a === "update_ptr") return `UPDATE POINTER: ${m}${hlText}`;
+        if (a === "insert") return `ENQUEUE: ${m}${hlText}`;
+        if (a === "remove") return `DEQUEUE: ${m}${hlText}`;
+        if (a === "error") return `ERROR: ${m}${hlText}`;
+        if (a === "done") return `DONE${hlText}`;
+        return `STEP: ${m}${hlText}`;
+      },
+
+      // Render
+      renderFromSnapshot(snap, highlightIds = []){
+        if (!this.canvasEl) return;
+        this.canvasEl.innerHTML = "";
+
+        const info = document.createElement("div");
+        info.className = "queue-info";
+        info.textContent =
+          `count=${snap.count}` +
+          (snap.headId != null ? `, head=${snap.headId}` : "") +
+          (snap.tailId != null ? `, tail=${snap.tailId}` : "");
+        this.canvasEl.appendChild(info);
+
+        const row = document.createElement("div");
+        row.className = "queue-row";
+        this.canvasEl.appendChild(row);
+
+        if (!snap.nodes || snap.nodes.length === 0){
+          const empty = document.createElement("div");
+          empty.className = "ll-empty";
+          empty.textContent = "Empty queue";
+          row.appendChild(empty);
+          return;
+        }
+
+        const badges = document.createElement("div");
+        badges.className = "queue-badges";
+        badges.innerHTML = `<span class="queue-badge">FRONT (HEAD)</span><span class="queue-badge">REAR (TAIL)</span>`;
+        this.canvasEl.insertBefore(badges, row);
+
+        const hlSet = new Set((highlightIds || []).map(String));
+
+        for (let i = 0; i < snap.nodes.length; i++){
+          const n = snap.nodes[i];
+
+          const nodeEl = document.createElement("div");
+          nodeEl.className = "queue-node";
+          nodeEl.dataset.qid = String(n.id);
+
+          if (hlSet.has(String(n.id))) nodeEl.classList.add("is-hl", "is-pulse");
+
+          const idTag = document.createElement("div");
+          idTag.className = "queue-node__id";
+          idTag.textContent = "#" + n.id;
+
+          const valTag = document.createElement("div");
+          valTag.className = "queue-node__val";
+          valTag.textContent = String(n.value);
+
+          nodeEl.appendChild(idTag);
+          nodeEl.appendChild(valTag);
+          row.appendChild(nodeEl);
+
+          if (i < snap.nodes.length - 1){
+            const arrow = document.createElement("div");
+            arrow.className = "queue-arrow";
+            arrow.textContent = "→";
+            row.appendChild(arrow);
+          }
+        }
+      },
+
+      // Animation hỗ trợ
+      captureNodeRects(){
+        const map = new Map();
+        if (!this.canvasEl) return map;
+        const nodes = this.canvasEl.querySelectorAll(".queue-node[data-qid]");
+        nodes.forEach(el => map.set(el.dataset.qid, el.getBoundingClientRect()));
+        return map;
+      },
+
+      playFLIP(oldRects, durationMs){
+        if (!this.canvasEl) return;
+        const nodes = this.canvasEl.querySelectorAll(".queue-node[data-qid]");
+        nodes.forEach(el => {
+          const id = el.dataset.qid;
+          const oldRect = oldRects.get(id);
+          if (!oldRect) return;
+
+          const newRect = el.getBoundingClientRect();
+          const dx = oldRect.left - newRect.left;
+          const dy = oldRect.top - newRect.top;
+
+          el.style.transition = "none";
+          el.style.transform = `translate(${dx}px, ${dy}px)`;
+          void el.offsetWidth;
+          el.style.transition = `transform ${durationMs}ms ease`;
+          el.style.transform = "translate(0px,0px)";
+        });
+      },
+
+      diffIds(prevSnap, nextSnap){
+        const a = new Set((prevSnap?.nodes || []).map(n => String(n.id)));
+        const b = new Set((nextSnap?.nodes || []).map(n => String(n.id)));
+        let insertedId = null, removedId = null;
+        b.forEach(id => { if (!a.has(id)) insertedId = id; });
+        a.forEach(id => { if (!b.has(id)) removedId = id; });
+        return { insertedId, removedId };
+      },
+
+      // Điều khiển thao tác
+      async run(op){
+        if (this.animating) return;
+
+        this.setBusy(true);
+        this.setStatus("", "clear");
+
+        try{
+          let steps = null;
+
+          if (op === "enqueue"){
+            const v = this.getValue();
+            if (v == null) { this.setStatus("⚠️ Please enter Element.", "replace"); return; }
+            steps = this.q.enqueue(v);
+          } else if (op === "dequeue"){
+            steps = this.q.dequeue();
+          } else {
+            this.setStatus("Unknown op: " + op, "replace");
+            return;
+          }
+
+          if (!Array.isArray(steps) || steps.length === 0){
+            this.setStatus("Done.", "replace");
+            return;
+          }
+
+          let prevSnap = steps[0].state;
+          this.setStatus(this.formatStepMessage(steps[0]), "append");
+          this.renderFromSnapshot(prevSnap, steps[0].highlight || []);
+          await this.sleep(this.STEP_DELAY);
+
+          for (let i = 1; i < steps.length; i++){
+            const s = steps[i];
+            const nextSnap = s.state;
+            const hl = (s.highlight || []).map(x => String(x));
+
+            this.setStatus(this.formatStepMessage(s), "append");
+
+            // Dequeue: pop-out
+            if (s.action === "remove"){
+              const d = this.diffIds(prevSnap, nextSnap);
+              if (d.removedId && this.canvasEl){
+                const el = this.canvasEl.querySelector(`.queue-node[data-qid="${d.removedId}"]`);
+                if (el){
+                  el.classList.add("is-leave");
+                  await this.sleep(260);
+                }
+              }
+            }
+
+            const oldRects = this.captureNodeRects();
+
+            this.renderFromSnapshot(nextSnap, hl);
+
+            this.playFLIP(oldRects, 500);
+
+            // pop-in khi enqueue (node mới thêm ở tail)
+            if (s.action === "insert"){
+              const d = this.diffIds(prevSnap, nextSnap);
+              if (d.insertedId && this.canvasEl){
+                const el = this.canvasEl.querySelector(`.queue-node[data-qid="${d.insertedId}"]`);
+                if (el) el.classList.add("is-enter");
+              }
+            }
+
+            await this.sleep(this.STEP_DELAY);
+            prevSnap = nextSnap;
+          }
+        } catch(err){
+          this.setStatus("❌ Error: " + (err?.message || String(err)), "replace");
+        } finally{
+          this.setBusy(false);
+        }
+      },
+
+      render(){
+        this.renderFromSnapshot(this.q.snapshot(), []);
+      }
+    };
+
+    uiRoot.addEventListener("click", (e) => {
+      const b = e.target.closest(".queue-btn-op");
+      if (!b) return;
+      queueController.run(b.dataset.op);
+    });
+
+    if (valueInput){
+      valueInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") queueController.run("enqueue");
+      });
+    }
+
+    queueController.setStatus("Ready.", "replace");
+    queueController.render();
+  }
+
+
+  // BINARY SEARCH TREE UI CONTROLLER
+  // - Render cây dạng phân tầng
+  // - Vẽ line bằng SVG
+  // - Button thao tác insert, delete, traversal
+
+  //Khởi tạo cây khi mở cửa sổ
+  function initTreeOnce() {
+    if (treeController) return;
+
+    if (!window.dsbrain || !window.dsbrain.bst) {
+      throw new Error("dsbrain.bst not found. Did you include tree.js before app.js?");
+    }
+
+    const panelEl = document.querySelector(`.panel[data-panel="binary-tree"]`);
+    if (!panelEl) return;
+
+    const uiRoot = panelEl.querySelector(".tree-ui");
+    if (!uiRoot) return;
+
+    const valueInput = uiRoot.querySelector(".tree-value");
+    const statusEl = uiRoot.querySelector(".tree-status");
+    const canvasEl = uiRoot.querySelector(".tree-canvas");
+
+    const t = new window.dsbrain.bst();
+
+    treeController = {
+      t,
+      uiRoot,
+      valueInput,
+      statusEl,
+      canvasEl,
+
+      // Animation
+      animating: false,
+      STEP_DELAY: 900,
+      sleep(ms){ return new Promise(r => setTimeout(r, ms)); },
+
+      setBusy(isBusy){
+        this.animating = !!isBusy;
+        if (this.uiRoot) this.uiRoot.classList.toggle("is-busy", !!isBusy);
+      },
+
+      // Text trạng thái
+      setStatus(msg, mode="append"){
+        if (!this.statusEl) return;
+        if (mode === "clear") { this.statusEl.textContent = ""; return; }
+        if (mode === "replace") { this.statusEl.textContent = msg || ""; return; }
+        const line = msg || "";
+        if (this.statusEl.textContent.trim() === "") this.statusEl.textContent = line;
+        else this.statusEl.textContent += "\n" + line;
+        this.statusEl.scrollTop = this.statusEl.scrollHeight;
+      },
+
+      getValue(){
+        const raw = (this.valueInput && this.valueInput.value != null)
+          ? String(this.valueInput.value).trim()
+          : "";
+        if (raw === "") return null;
+        const v = Number(raw);
+        if (Number.isNaN(v)) return null;
+        return v;
+      },
+
+      formatStepMessage(stepObj){
+        const a = String(stepObj?.action || "").toLowerCase();
+        const m = String(stepObj?.message || "").toUpperCase();
+        const hl = (stepObj?.highlight || []).map(x => String(x));
+        const hlText = hl.length ? ` [NODE ${hl.join(", ")}]` : "";
+
+        if (a === "start") return `START: ${m}${hlText}`;
+        if (a === "visit") return `VISIT: ${m}${hlText}`;
+        if (a === "go_left") return `GO LEFT: ${m}${hlText}`;
+        if (a === "go_right") return `GO RIGHT: ${m}${hlText}`;
+        if (a === "create") return `CREATE: ${m}${hlText}`;
+        if (a === "link") return `LINK: ${m}${hlText}`;
+        if (a === "found") return `FOUND: ${m}${hlText}`;
+        if (a === "check") return `CHECK: ${m}${hlText}`;
+        if (a === "find_succ") return `SUCCESSOR: ${m}${hlText}`;
+        if (a === "copy") return `COPY: ${m}${hlText}`;
+        if (a === "unlink") return `UNLINK: ${m}${hlText}`;
+        if (a === "insert") return `INSERT: ${m}${hlText}`;
+        if (a === "remove") return `REMOVE: ${m}${hlText}`;
+        if (a === "error") return `ERROR: ${m}${hlText}`;
+        if (a === "done") return `DONE${hlText}`;
+        return `STEP: ${m}${hlText}`;
+      },
+
+      // Render cây
+      renderFromSnapshot(snap, highlightIds = []){
+        if (!this.canvasEl) return;
+        this.canvasEl.innerHTML = "";
+
+        const info = document.createElement("div");
+        info.className = "tree-info";
+        info.textContent = `count=${snap.count}` + (snap.rootId != null ? `, root=${snap.rootId}` : "");
+        this.canvasEl.appendChild(info);
+
+        // Vẽ line nối Nodes
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.classList.add("tree-svg");
+        this.canvasEl.appendChild(svg);
+
+        // Node ID và Node data
+        const map = new Map((snap.nodes || []).map(n => [String(n.id), n]));
+        if (!snap.nodes || snap.nodes.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "ll-empty";
+          empty.textContent = "Empty tree";
+          this.canvasEl.appendChild(empty);
+          return;
+        }
+
+        const W = this.canvasEl.clientWidth || 800;
+        const LEVEL_H = 80;
+        const nodesPos = new Map();
+
+        function buildChildren(id){
+          const n = map.get(String(id));
+          return {
+            id: String(n.id),
+            left: n.leftId != null ? String(n.leftId) : null,
+            right: n.rightId != null ? String(n.rightId) : null
+          };
+        }
+
+        function layout(nodeId, x, y, offset){
+          if (!nodeId) return;
+          nodesPos.set(String(nodeId), {x, y});
+          const n = buildChildren(nodeId);
+          if (n.left) layout(n.left, x - offset, y + LEVEL_H, offset / 2);
+          if (n.right) layout(n.right, x + offset, y + LEVEL_H, offset / 2);
+        }
+
+        layout(String(snap.rootId), W/2, 50, W/4);
+
+        // Vẽ đường
+        nodesPos.forEach((pos, id) => {
+          const n = map.get(String(id));
+          if (!n) return;
+
+          function lineTo(childId){
+            const c = nodesPos.get(String(childId));
+            if (!c) return;
+            const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            ln.setAttribute("x1", pos.x);
+            ln.setAttribute("y1", pos.y);
+            ln.setAttribute("x2", c.x);
+            ln.setAttribute("y2", c.y);
+            ln.setAttribute("class", "tree-line");
+            svg.appendChild(ln);
+          }
+
+          if (n.leftId != null) lineTo(n.leftId);
+          if (n.rightId != null) lineTo(n.rightId);
+        });
+
+        // Vẽ Node
+        const hlSet = new Set((highlightIds || []).map(String));
+        nodesPos.forEach((pos, id) => {
+          const n = map.get(String(id));
+          if (!n) return;
+
+          const el = document.createElement("div");
+          el.className = "tree-node";
+          el.dataset.tid = String(n.id);
+          el.style.left = (pos.x) + "px";
+          el.style.top = (pos.y) + "px";
+          el.innerHTML = `<div class="tree-node__val">${n.value}</div><div class="tree-node__id">#${n.id}</div>`;
+
+          if (hlSet.has(String(n.id))) el.classList.add("is-hl", "is-pulse");
+          this.canvasEl.appendChild(el);
+        });
+      },
+
+      diffIds(prevSnap, nextSnap){
+        const a = new Set((prevSnap?.nodes || []).map(n => String(n.id)));
+        const b = new Set((nextSnap?.nodes || []).map(n => String(n.id)));
+        let insertedId = null, removedId = null;
+        b.forEach(id => { if (!a.has(id)) insertedId = id; });
+        a.forEach(id => { if (!b.has(id)) removedId = id; });
+        return { insertedId, removedId };
+      },
+
+      // Điều khiển thao tác
+      async run(op){
+        if (this.animating) return;
+
+        this.setBusy(true);
+        this.setStatus("", "clear");
+
+        try{
+          let steps = null;
+
+          if (op === "insert"){
+            const v = this.getValue();
+            if (v == null) { this.setStatus("⚠️ Please enter Element.", "replace"); return; }
+            steps = this.t.insert(v);
+          } else if (op === "delete"){
+            const v = this.getValue();
+            if (v == null) { this.setStatus("⚠️ Please enter Element.", "replace"); return; }
+            steps = this.t.delete(v);
+          } else if (op === "preorder"){
+            steps = this.t.preorder();
+          } else if (op === "inorder"){
+            steps = this.t.inorder();
+          } else if (op === "postorder"){
+            steps = this.t.postorder();
+          } else {
+            this.setStatus("Unknown op: " + op, "replace");
+            return;
+          }
+
+          if (!Array.isArray(steps) || steps.length === 0){
+            this.setStatus("Done.", "replace");
+            return;
+          }
+
+          let prevSnap = steps[0].state;
+          this.setStatus(this.formatStepMessage(steps[0]), "append");
+          this.renderFromSnapshot(prevSnap, steps[0].highlight || []);
+          await this.sleep(this.STEP_DELAY);
+
+          for (let i = 1; i < steps.length; i++){
+            const s = steps[i];
+            const nextSnap = s.state;
+            const hl = (s.highlight || []).map(x => String(x));
+
+            this.setStatus(this.formatStepMessage(s), "append");
+
+            // Remove: pop-out node
+            if (s.action === "remove"){
+              const d = this.diffIds(prevSnap, nextSnap);
+              if (d.removedId && this.canvasEl){
+                const el = this.canvasEl.querySelector(`.tree-node[data-tid="${d.removedId}"]`);
+                if (el){
+                  el.classList.add("is-leave");
+                  await this.sleep(260);
+                }
+              }
+            }
+
+            this.renderFromSnapshot(nextSnap, hl);
+
+            // Insert: pop-in node
+            if (s.action === "insert"){
+              const d = this.diffIds(prevSnap, nextSnap);
+              if (d.insertedId && this.canvasEl){
+                const el = this.canvasEl.querySelector(`.tree-node[data-tid="${d.insertedId}"]`);
+                if (el) el.classList.add("is-enter");
+              }
+            }
+
+            await this.sleep(this.STEP_DELAY);
+            prevSnap = nextSnap;
+          }
+        } catch(err){
+          this.setStatus("❌ Error: " + (err?.message || String(err)), "replace");
+        } finally{
+          this.setBusy(false);
+        }
+      },
+
+      render(){
+        this.renderFromSnapshot(this.t.snapshot(), []);
+      }
+    };
+
+    uiRoot.addEventListener("click", (e) => {
+      const b = e.target.closest(".tree-btn-op");
+      if (!b) return;
+      treeController.run(b.dataset.op);
+    });
+
+    if (valueInput){
+      valueInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") treeController.run("insert");
+      });
+    }
+
+    treeController.setStatus("Ready.", "replace");
+    treeController.render();
+  }
+
 
   // CHẠY CHƯƠNG TRÌNH SAU KHI CỬA SỔ ĐƯỢC MỞ
+  // - Chạy sau khi 1 panel được mở
+  // - Init UI tương ứng nếu chưa tồn tại
   function afterPanelShown(panelKey) {
+    //Cửa sổ Stack
     if (panelKey === "stack") {
       initStackOnce();
       if (stackController) stackController.render();
       return;
     }
+    //Cửa sổ Queue
+    if (panelKey === "queue") {
+      initQueueOnce();
+      if (queueController) queueController.render();
+      return;
+    }
+    //Cửa sổ Binary Tree
+    if (panelKey === "binary-tree") {
+      initTreeOnce();
+      if (treeController) treeController.render();
+      return;
+    }
 
+    //Cửa sổ Linked List
     // Chỉ xử lý khi mở đúng 1 trong 3 cửa sổ Linked List
     if (
       panelKey !== "linked-list-singly" &&
@@ -486,7 +1061,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setStatus(msg, mode = "append") {
         if (!statusEl) return;
 
-        // mode: "append" | "replace" | "clear"
+        // "append" - "replace" - "clear"
         if (mode === "clear") {
           statusEl.textContent = "";
           return;
@@ -496,7 +1071,6 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        // append (mặc định)
         const line = msg || "";
         if (statusEl.textContent.trim() === "") statusEl.textContent = line;
         else statusEl.textContent += "\n" + line;
@@ -542,31 +1116,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const hl = (stepObj?.highlight || []).map(x => String(x));
         const hlText = hl.length ? ` [NODE ${hl.join(", ")}]` : "";
 
-        // helper: lấy số index trong chuỗi "visit index 3" hoặc "reach index 3"
+        //Lấy thông tin vị trí của Node
         const getIndexNumber = () => {
-          // 1) dạng "visit index 3" / "reach index 3"
           let t = m.match(/(?:visit|reach)\s+index\s+(-?\d+)/i);
           if (t) return t[1];
 
-          // 2) dạng "insertAtIndex(3, 70)" hoặc "deleteAtIndex(3)"
           t = m.match(/(?:insertAtIndex|deleteAtIndex)\s*\(\s*(-?\d+)/i);
           if (t) return t[1];
 
           return null;
         };
 
-        // helper: lấy value trong chuỗi "insertHead(10)" / "insertTail(10)" / "insertAtIndex(2, 10)"
         const getValueNumber = () => {
-          const t = m.match(/\(([^)]+)\)/); // lấy phần trong ngoặc
+          const t = m.match(/\(([^)]+)\)/);
           if (!t) return null;
-          // thử tìm số cuối cùng trong ngoặc
           const nums = t[1].match(/-?\d+(\.\d+)?/g);
           return (nums && nums.length) ? nums[nums.length - 1] : null;
         };
 
+        //Các text trạng thái chạy của từng bước
         // START
         if (a === "start"){
-          // cố gắng “đặt tiêu đề” theo operation
           if (/inserthead/i.test(m)) return `START: INSERT AT HEAD${hlText}`;
           if (/inserttail/i.test(m)) return `START: INSERT AT TAIL${hlText}`;
           if (/insertatindex/i.test(m)) {
@@ -628,7 +1198,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
 
 
-      // lấy vị trí (rect) của từng node hiện đang hiển thị
+      // Lấy vị trí của từng node hiện đang hiển thị
       captureNodeRects(){
         const map = new Map();
         if (!this.canvasEl) return map;
@@ -641,13 +1211,13 @@ document.addEventListener("DOMContentLoaded", () => {
         return map;
       },
 
-      // tìm node element theo id
+      // Tìm node element theo id
       getNodeElById(id){
         if (!this.canvasEl) return null;
         return this.canvasEl.querySelector(`.ll-node[data-nodeid="${id}"]`);
       },
 
-      // so sánh snapshot để biết id nào mới thêm / bị xóa
+      // So sánh snapshot để biết id nào mới thêm hoặc bị xóa
       diffSnapshots(beforeSnap, afterSnap){
         const a = new Set((beforeSnap?.nodes || []).map(n => String(n.id)));
         const b = new Set((afterSnap?.nodes || []).map(n => String(n.id)));
@@ -661,7 +1231,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return { insertedId, removedId };
       },
 
-      // chạy FLIP cho các node tồn tại trước & sau (dịch linear)
+      // Chạy FLIP cho các node tồn tại trước & sau để làm animation di chuyển linear
       playFLIP(oldRects, durationMs){
         if (!this.canvasEl) return;
 
@@ -675,20 +1245,18 @@ document.addEventListener("DOMContentLoaded", () => {
           const dx = oldRect.left - newRect.left;
           const dy = oldRect.top - newRect.top;
 
-          // “Invert”: đặt node về vị trí cũ bằng transform
+          // Invert: đặt node về vị trí cũ bằng transform
           el.style.transition = "none";
           el.style.transform = `translate(${dx}px, ${dy}px)`;
-
-          // force reflow
           void el.offsetWidth;
 
-          // “Play”: trả về transform=0 để node chạy về vị trí mới
+          // Play: trả về transform=0 để node chạy về vị trí mới
           el.style.transition = `transform ${durationMs}ms ease`;
           el.style.transform = "translate(0px, 0px)";
         });
       },
 
-      // pop-in cho node mới
+      // Pop-in cho node mới
       popInNode(id, durationMs){
         const el = this.getNodeElById(id);
         if (!el) return;
@@ -697,12 +1265,12 @@ document.addEventListener("DOMContentLoaded", () => {
         el.style.transition = "none";
         void el.offsetWidth;
 
-        // chạy vào
+        // Chạy vào
         el.style.transition = `transform ${durationMs}ms ease, opacity ${durationMs}ms ease`;
         el.classList.remove("is-enter");
       },
 
-      // pop-out cho node bị xóa (trước khi xóa thật)
+      // Pop-out cho node bị xóa
       popOutNode(id, durationMs){
         const el = this.getNodeElById(id);
         if (!el) return;
@@ -718,7 +1286,7 @@ document.addEventListener("DOMContentLoaded", () => {
         this.setBusy(true);
         this.setStatus("", "clear");
         try{
-          // validate input nhanh
+          // Input nhanh
           const idx = this.getIndex();
           const v = this.getValue();
 
@@ -728,7 +1296,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           if (op === "deleteAtIndex" && idx == null) { this.setStatus("⚠️ Nhập Index (số nguyên).", "replace"); }
 
-          // lấy steps
+          // Lấy steps
           let steps = null;
           if (op === "insertHead") steps = this.list.insertHead(v);
           else if (op === "insertTail") steps = this.list.insertTail(v);
@@ -745,21 +1313,19 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
-          // step đầu
+          // Step đầu
           let prevSnap = steps[0].state;
           this.setStatus(this.formatStepMessage(steps[0]), "append");
           this.renderFromSnapshot(prevSnap, steps[0].highlight || []);
           await this.sleep(this.STEP_DELAY);
 
-          // chạy từng step
+          // Chạy từng step
           for (let i = 1; i < steps.length; i++){
             const s = steps[i];
             const nextSnap = s.state;
 
             await this.sleep(150);
             this.setStatus(this.formatStepMessage(s), "append");
-
-            // chuẩn hóa highlight thành string để match chắc
             const hl = (s.highlight || []).map(x => String(x));
 
             if (s.action === "visit"){
@@ -787,17 +1353,16 @@ document.addEventListener("DOMContentLoaded", () => {
             prevSnap = nextSnap;
           }
         } catch(err){
-          // ✅ có lỗi thì báo ra, không treo UI
-          this.setStatus("❌ Error: " + (err?.message || String(err)), "replace");
+          // Có lỗi thì báo ra, không treo UI
+          this.setStatus("Error: " + (err?.message || String(err)), "replace");
         } finally{
-          // ✅ dù lỗi gì cũng mở khóa
           this.setBusy(false);
         }
       },
 
 
 
-      // Vẽ mũi tên circular: tail -> mép trái -> head (bằng SVG overlay)
+      // Vẽ mũi tên circular: tail -> mép trái -> head
       drawCircularArrow(snap) {
         if (!this.canvasEl) return;
 
@@ -821,7 +1386,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Đảm bảo canvas có position:relative để svg bám đúng
         this.canvasEl.classList.add("ll-canvas--rel");
 
-        // Tạo / lấy svg overlay
+        // Tạo hoặc lấy svg overlay
         let svg = this.canvasEl.querySelector(".ll-circular-svg");
         if (!svg) {
           svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -846,7 +1411,7 @@ document.addEventListener("DOMContentLoaded", () => {
           defs.appendChild(marker);
           svg.appendChild(defs);
 
-          // path chính
+          // Đường đi chính
           const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
           path.classList.add("ll-circular-svg__path");
           path.setAttribute("marker-end", "url(#llArrowHead)");
@@ -855,7 +1420,7 @@ document.addEventListener("DOMContentLoaded", () => {
           this.canvasEl.appendChild(svg);
         }
 
-        // Kích thước svg theo vùng scroll của canvas (để tính tọa độ đúng)
+        // Kích thước svg theo vùng scroll của canvas
         const cw = this.canvasEl.scrollWidth;
         const ch = this.canvasEl.scrollHeight;
         svg.setAttribute("width", String(cw));
@@ -877,19 +1442,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const H = toCanvasXY(headRect);
         const T = toCanvasXY(tailRect);
 
-        // Điểm start: đáy của tail (giữa theo chiều ngang)
+        // Điểm start: đáy của tail
         const startX = T.x + T.w / 2;
         const startY = T.y + T.h;
 
-        // Điểm end: cạnh trái của head (giữa theo chiều dọc)
+        // Điểm end: cạnh trái của head
         const endX = H.x;
         const endY = H.y + H.h / 2;
 
-        // “Mép trái” để chạy vòng ra ngoài tránh va chạm node
-        const leftEdgeX = 8; // sát trái canvas một chút
-        const padY = 0;      // bạn muốn nâng/hạ thêm thì chỉnh ở đây
-
-        // Độ "lụi xuống" để chạy dưới đáy các node (bao ngoài)
+        // Mép trái để chạy vòng ra ngoài tránh va chạm node
+        const leftEdgeX = 8; // sát trái canvas
+        const padY = 0;
         const bottomY = Math.max(startY, endY) + 40;
 
         // Path: tail (dưới) -> đi xuống -> chạy ngang sang mép trái -> đi lên -> chạm head

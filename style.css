@@ -753,3 +753,205 @@ body{
   overflow: auto;
   padding-right: 6px;
 }
+
+/* QUEUE UI */
+.queue-canvas{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.queue-info{
+  font-weight: 900;
+  color: #0f172a;
+  opacity: .75;
+}
+
+.queue-badges{
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.queue-badge{
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  color: var(--c1);
+  background: rgba(27,64,121,0.10);
+  border: 1px solid rgba(27,64,121,0.18);
+}
+
+.queue-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.queue-node{
+  min-width: 140px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(27,64,121,0.14);
+  border: 1px solid rgba(27,64,121,0.22);
+
+  will-change: transform, opacity;
+  transform-origin: center;
+}
+
+.queue-node__id{
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--c1);
+  opacity: .8;
+  margin-bottom: 6px;
+}
+
+.queue-node__val{
+  padding: 10px 8px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 900;
+  border: 1px solid rgba(15,23,42,0.12);
+  background: rgba(255,255,255,0.65);
+}
+
+.queue-arrow{
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--c1);
+  opacity: 0.7;
+}
+
+/* Busy lock */
+.queue-ui.is-busy .queue-btn-op{
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* pop-in */
+.queue-node.is-enter{
+  opacity: 0;
+  transform: scale(0.6) translateY(-8px);
+}
+
+/* pop-out */
+.queue-node.is-leave{
+  opacity: 0;
+  transform: scale(0.75) translateY(8px);
+  transition: transform 260ms ease, opacity 260ms ease;
+}
+
+/* highlight */
+.queue-node.is-hl{
+  border-color: rgba(27, 64, 121, 0.65);
+  box-shadow: 0 10px 18px rgba(27,64,121,0.18);
+  transform: scale(1.03);
+}
+
+@keyframes qPulse{
+  0%{ transform: scale(1.00); }
+  50%{ transform: scale(1.05); }
+  100%{ transform: scale(1.00); }
+}
+
+.queue-node.is-pulse{
+  animation: qPulse .35s ease;
+}
+
+/* TREE UI */
+.tree-canvas{
+  position: relative;
+  min-height: 420px;
+  overflow: auto;
+}
+
+.tree-info{
+  font-weight: 900;
+  color: #0f172a;
+  opacity: .75;
+  margin-bottom: 8px;
+}
+
+.tree-svg{
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tree-line{
+  stroke: rgba(27, 64, 121, 0.55);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.tree-node{
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 78px;
+  height: 78px;
+  border-radius: 999px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(27,64,121,0.14);
+  border: 1px solid rgba(27,64,121,0.25);
+
+  will-change: transform, opacity;
+  transform-origin: center;
+  z-index: 5;
+}
+
+.tree-node__val{
+  font-weight: 900;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.tree-node__id{
+  font-weight: 900;
+  font-size: 11px;
+  color: var(--c1);
+  opacity: .75;
+}
+
+/* busy lock */
+.tree-ui.is-busy .tree-btn-op{
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* pop-in / pop-out */
+.tree-node.is-enter{
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.6);
+}
+
+.tree-node.is-leave{
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.75);
+  transition: transform 260ms ease, opacity 260ms ease;
+}
+
+/* highlight + pulse */
+.tree-node.is-hl{
+  border-color: rgba(27, 64, 121, 0.70);
+  box-shadow: 0 12px 22px rgba(27,64,121,0.18);
+}
+
+@keyframes treePulse{
+  0%{ transform: translate(-50%, -50%) scale(1.00); }
+  50%{ transform: translate(-50%, -50%) scale(1.08); }
+  100%{ transform: translate(-50%, -50%) scale(1.00); }
+}
+.tree-node.is-pulse{
+  animation: treePulse .35s ease;
+}

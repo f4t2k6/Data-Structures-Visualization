@@ -1,185 +1,264 @@
+(function () {
+  if (!window.dsbrain) window.dsbrain = {};
 
-class TreeNode {
-    constructor(value) {
-        this.value = value;
-        this.left = null;
-        this.right = null;
-        // Tọa độ để vẽ (sẽ được tính toán sau)
-        this.x = 0;
-        this.y = 0;
+  // ===== utils =====
+  var __tid = 1;
+
+  function TreeNode(value) {
+    this.id = __tid++;
+    this.value = value;
+    this.left = null;
+    this.right = null;
+  }
+
+  function makeStep(action, message, t, highlightIds) {
+    return {
+      action: action,
+      message: message,
+      highlight: highlightIds || [],
+      state: t.snapshot()
+    };
+  }
+
+  // ===== BST =====
+  function bst() {
+    this.root = null;
+    this.count = 0;
+  }
+
+  bst.prototype.snapshot = function () {
+    var nodes = [];
+    function dfs(n) {
+      if (!n) return;
+      nodes.push({
+        id: n.id,
+        value: n.value,
+        leftId: n.left ? n.left.id : null,
+        rightId: n.right ? n.right.id : null
+      });
+      dfs(n.left);
+      dfs(n.right);
     }
-}
+    dfs(this.root);
 
-class BinarySearchTree {
-    constructor() {
-        this.root = null;
+    return {
+      count: this.count,
+      rootId: this.root ? this.root.id : null,
+      nodes: nodes
+    };
+  };
+
+  // ===== INSERT (BST) =====
+  bst.prototype.insert = function (value) {
+    var steps = [];
+    steps.push(makeStep("start", "insert(" + value + ")", this));
+
+    if (!this.root) {
+      steps.push(makeStep("create", "create root node", this));
+      this.root = new TreeNode(value);
+      this.count++;
+      steps.push(makeStep("insert", "root inserted", this, [this.root.id]));
+      steps.push(makeStep("done", "insert finished", this, [this.root.id]));
+      return steps;
     }
 
-    // Thêm node (Insert)
-    insert(value) {
-        const newNode = new TreeNode(value);
-        if (!this.root) {
-            this.root = newNode;
-            return;
+    var cur = this.root;
+    while (cur) {
+      steps.push(makeStep("visit", "compare with node " + cur.value, this, [cur.id]));
+
+      if (value === cur.value) {
+        steps.push(makeStep("error", "value already exists (no duplicates)", this, [cur.id]));
+        steps.push(makeStep("done", "insert finished", this, [cur.id]));
+        return steps;
+      }
+
+      if (value < cur.value) {
+        steps.push(makeStep("go_left", "value < current → go left", this, [cur.id]));
+        if (!cur.left) {
+          steps.push(makeStep("create", "create new node", this, [cur.id]));
+          var nnL = new TreeNode(value);
+          steps.push(makeStep("link", "link as LEFT child", this, [cur.id]));
+          cur.left = nnL;
+          this.count++;
+          steps.push(makeStep("insert", "node inserted at LEFT", this, [nnL.id]));
+          steps.push(makeStep("done", "insert finished", this, [nnL.id]));
+          return steps;
         }
-        let current = this.root;
-        while (true) {
-            if (value === current.value) return; // Không thêm trùng
-            if (value < current.value) {
-                if (!current.left) {
-                    current.left = newNode;
-                    return;
-                }
-                current = current.left;
-            } else {
-                if (!current.right) {
-                    current.right = newNode;
-                    return;
-                }
-                current = current.right;
-            }
+        cur = cur.left;
+      } else {
+        steps.push(makeStep("go_right", "value > current → go right", this, [cur.id]));
+        if (!cur.right) {
+          steps.push(makeStep("create", "create new node", this, [cur.id]));
+          var nnR = new TreeNode(value);
+          steps.push(makeStep("link", "link as RIGHT child", this, [cur.id]));
+          cur.right = nnR;
+          this.count++;
+          steps.push(makeStep("insert", "node inserted at RIGHT", this, [nnR.id]));
+          steps.push(makeStep("done", "insert finished", this, [nnR.id]));
+          return steps;
         }
+        cur = cur.right;
+      }
     }
 
-    search(value) {
-        let current = this.root;
-        while (current) {
-            if (value === current.value) return current;
-            if (value < current.value) current = current.left;
-            else current = current.right;
+    steps.push(makeStep("done", "insert finished", this));
+    return steps;
+  };
+
+  // ===== DELETE (BST) with steps =====
+  bst.prototype.delete = function (value) {
+    var steps = [];
+    steps.push(makeStep("start", "delete(" + value + ")", this));
+
+    // tìm node + parent để dễ step
+    var parent = null;
+    var cur = this.root;
+
+    while (cur) {
+      steps.push(makeStep("visit", "compare with node " + cur.value, this, [cur.id]));
+
+      if (value === cur.value) break;
+
+      parent = cur;
+      if (value < cur.value) {
+        steps.push(makeStep("go_left", "value < current → go left", this, [cur.id]));
+        cur = cur.left;
+      } else {
+        steps.push(makeStep("go_right", "value > current → go right", this, [cur.id]));
+        cur = cur.right;
+      }
+    }
+
+    if (!cur) {
+      steps.push(makeStep("error", "value not found", this));
+      steps.push(makeStep("done", "delete finished", this));
+      return steps;
+    }
+
+    steps.push(makeStep("found", "found target node", this, [cur.id]));
+
+    // helper replace child pointer of parent
+    var replaceChild = (function (_this) {
+      return function (par, oldNode, newNode) {
+        if (!par) {
+          _this.root = newNode;
+          return;
         }
-        return null;
+        if (par.left === oldNode) par.left = newNode;
+        else if (par.right === oldNode) par.right = newNode;
+      };
+    })(this);
+
+    // Case A: leaf
+    if (!cur.left && !cur.right) {
+      steps.push(makeStep("check", "case: leaf node", this, [cur.id]));
+      steps.push(makeStep("unlink", "unlink from parent", this, parent ? [parent.id, cur.id] : [cur.id]));
+      replaceChild(parent, cur, null);
+      this.count--;
+      steps.push(makeStep("remove", "node removed", this, parent ? [parent.id] : []));
+      steps.push(makeStep("done", "delete finished", this));
+      return steps;
     }
 
-    delete(value) {
-        this.root = this._deleteNode(this.root, value);
+    // Case B: one child
+    if (!cur.left || !cur.right) {
+      steps.push(makeStep("check", "case: one child", this, [cur.id]));
+      var child = cur.left ? cur.left : cur.right;
+      steps.push(makeStep("link", "parent points to child", this, parent ? [parent.id, child.id] : [child.id]));
+      replaceChild(parent, cur, child);
+      this.count--;
+      steps.push(makeStep("remove", "node removed", this, [child.id]));
+      steps.push(makeStep("done", "delete finished", this, [child.id]));
+      return steps;
     }
 
-    _deleteNode(node, value) {
-        if (!node) return null;
-        if (value < node.value) {
-            node.left = this._deleteNode(node.left, value);
-            return node;
-        } else if (value > node.value) {
-            node.right = this._deleteNode(node.right, value);
-            return node;
-        } else {
-            // Trường hợp 1: Không có con hoặc 1 con
-            if (!node.left) return node.right;
-            if (!node.right) return node.left;
-            let minNode = this._findMin(node.right);
-            node.value = minNode.value;
-            node.right = this._deleteNode(node.right, minNode.value);
-            return node;
-        }
+    // Case C: two children -> inorder successor
+    steps.push(makeStep("check", "case: two children", this, [cur.id]));
+    steps.push(makeStep("find_succ", "find inorder successor (min in right subtree)", this, [cur.id]));
+
+    // successor is min(cur.right)
+    var succParent = cur;
+    var succ = cur.right;
+
+    steps.push(makeStep("go_right", "go to right subtree", this, [succ.id]));
+
+    while (succ.left) {
+      succParent = succ;
+      steps.push(makeStep("go_left", "go left to find min", this, [succ.id]));
+      succ = succ.left;
     }
 
-    _findMin(node) {
-        while (node.left) node = node.left;
-        return node;
+    steps.push(makeStep("select", "successor selected", this, [succ.id]));
+
+    // copy value
+    steps.push(makeStep("copy", "copy successor value into target", this, [cur.id, succ.id]));
+    cur.value = succ.value;
+
+    // delete successor (successor has at most one right child)
+    var succChild = succ.right ? succ.right : null;
+    steps.push(makeStep("unlink", "remove successor node", this, [succParent.id, succ.id]));
+
+    if (succParent.left === succ) succParent.left = succChild;
+    else succParent.right = succChild;
+
+    this.count--;
+    steps.push(makeStep("remove", "successor removed, tree updated", this, [cur.id]));
+    steps.push(makeStep("done", "delete finished", this, [cur.id]));
+    return steps;
+  };
+
+  // ===== TRAVERSALS =====
+  bst.prototype.preorder = function () {
+    var steps = [];
+    steps.push(makeStep("start", "preorder (NLR)", this));
+    var _this = this;
+
+    function dfs(n) {
+      if (!n) return;
+      steps.push(makeStep("visit", "visit node " + n.value, _this, [n.id]));
+      dfs(n.left);
+      dfs(n.right);
     }
-}
-const myTree = new BinarySearchTree();
-const canvas = document.getElementById('visualization-canvas');
-const NODE_RADIUS = 30; 
-const LEVEL_HEIGHT = 80; 
-function renderTree() {
-    if (!canvas.classList.contains('view-tree')) return; 
-    canvas.innerHTML = ''; 
-    const svgLayer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgLayer.id = "tree-svg-layer";
-    canvas.appendChild(svgLayer);
-    if (!myTree.root) return;
-    const width = canvas.clientWidth;
-    calculatePosition(myTree.root, width / 2, 40, width / 4);
-    drawLines(svgLayer, myTree.root);
-    drawNodes(myTree.root);
-}
+    dfs(this.root);
 
-function calculatePosition(node, x, y, offset) {
-    if (!node) return;
-    node.x = x;
-    node.y = y;
-    calculatePosition(node.left, x - offset, y + LEVEL_HEIGHT, offset / 2);
-    calculatePosition(node.right, x + offset, y + LEVEL_HEIGHT, offset / 2);
-}
+    steps.push(makeStep("done", "preorder finished", this));
+    return steps;
+  };
 
-function drawNodes(node) {
-    if (!node) return;
-    const nodeDiv = document.createElement('div');
-    nodeDiv.className = 'tree-node';
-    nodeDiv.innerText = node.value;
-    nodeDiv.style.left = (node.x - NODE_RADIUS) + 'px';
-    nodeDiv.style.top = (node.y - NODE_RADIUS) + 'px';
-    nodeDiv.id = `node-${node.value}`;
-    canvas.appendChild(nodeDiv);
-    drawNodes(node.left);
-    drawNodes(node.right);
-}
+  bst.prototype.inorder = function () {
+    var steps = [];
+    steps.push(makeStep("start", "inorder (LNR)", this));
+    var _this = this;
 
-function drawLines(svgContainer, node) {
-    if (!node) return;
-
-    if (node.left) {
-        createLine(svgContainer, node.x, node.y, node.left.x, node.left.y);
-        drawLines(svgContainer, node.left);
+    function dfs(n) {
+      if (!n) return;
+      dfs(n.left);
+      steps.push(makeStep("visit", "visit node " + n.value, _this, [n.id]));
+      dfs(n.right);
     }
-    if (node.right) {
-        createLine(svgContainer, node.x, node.y, node.right.x, node.right.y);
-        drawLines(svgContainer, node.right);
+    dfs(this.root);
+
+    steps.push(makeStep("done", "inorder finished", this));
+    return steps;
+  };
+
+  bst.prototype.postorder = function () {
+    var steps = [];
+    steps.push(makeStep("start", "postorder (LRN)", this));
+    var _this = this;
+
+    function dfs(n) {
+      if (!n) return;
+      dfs(n.left);
+      dfs(n.right);
+      steps.push(makeStep("visit", "visit node " + n.value, _this, [n.id]));
     }
-}
+    dfs(this.root);
 
-function createLine(svgContainer, x1, y1, x2, y2) {
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", x2);
-    line.setAttribute("y2", y2);
-    line.setAttribute("class", "tree-line");
-    svgContainer.appendChild(line);
-}
+    steps.push(makeStep("done", "postorder finished", this));
+    return steps;
+  };
 
-document.querySelector('#controls-tree .btn-primary').onclick = function() {
-    const input = document.getElementById('value-input');
-    const val = parseInt(input.value);
-    
-    if (isNaN(val)) {
-        alert("Vui lòng nhập số!");
-        return;
-    }
-
-    myTree.insert(val);
-    renderTree(); // Vẽ lại
-    
-    // Log
-    const logBox = document.getElementById('log-box');
-    logBox.innerHTML = `<p class="log-entry">[Tree] Đã thêm node ${val}</p>` + logBox.innerHTML;
-    input.value = '';
-    input.focus();
-};
-
-document.querySelector('#controls-tree .btn-outline').onclick = function() {
-    const val = parseInt(document.getElementById('value-input').value);
-    const foundNode = myTree.search(val);
-    document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('node-highlight'));
-
-    if (foundNode) {
-        const uiNode = document.getElementById(`node-${val}`);
-        if(uiNode) uiNode.classList.add('node-highlight');
-        alert(`Tìm thấy giá trị ${val}!`);
-    } else {
-        alert(`Không tìm thấy ${val}`);
-    }
-};
-
-document.querySelector('#controls-tree .btn-danger').onclick = function() {
-    const val = parseInt(document.getElementById('value-input').value);
-    if (isNaN(val)) return;
-    
-    myTree.delete(val);
-    renderTree();
-    
-    const logBox = document.getElementById('log-box');
-    logBox.innerHTML = `<p class="log-entry">[Tree] Đã xóa node ${val}</p>` + logBox.innerHTML;
-};
+  // export
+  window.dsbrain.bst = bst;
+})();
