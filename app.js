@@ -106,9 +106,147 @@ document.addEventListener("DOMContentLoaded", () => {
       statusEl,
       canvasEl,
 
+      animating: false,
+      STEP_DELAY: 900,
+      sleep(ms){ return new Promise(r => setTimeout(r, ms)); },
+
+      setBusy(isBusy){
+        this.animating = !!isBusy;
+        if (this.uiRoot) this.uiRoot.classList.toggle("is-busy", !!isBusy);
+      },
+
+      renderFromSnapshot(snap, highlightIds = []){
+        if (!this.canvasEl) return;
+
+        this.canvasEl.innerHTML = "";
+
+        const info = document.createElement("div");
+        info.className = "stack-info";
+        info.textContent = `count=${snap.count}` + (snap.topId != null ? `, top=${snap.topId}` : "");
+        this.canvasEl.appendChild(info);
+
+        const col = document.createElement("div");
+        col.className = "stack-col";
+        this.canvasEl.appendChild(col);
+
+        if (!snap.nodes || snap.nodes.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "ll-empty";
+          empty.textContent = "Empty stack";
+          col.appendChild(empty);
+          return;
+        }
+
+        const topBadge = document.createElement("div");
+        topBadge.className = "stack-top-badge";
+        topBadge.textContent = "TOP";
+        col.appendChild(topBadge);
+
+        const hlSet = new Set((highlightIds || []).map(String));
+
+        for (let i = 0; i < snap.nodes.length; i++) {
+          const n = snap.nodes[i];
+
+          const item = document.createElement("div");
+          item.className = "stack-item";
+          item.dataset.sid = String(n.id);
+
+          if (hlSet.has(String(n.id))) item.classList.add("is-hl", "is-pulse");
+
+          const idTag = document.createElement("div");
+          idTag.className = "stack-item__id";
+          idTag.textContent = "#" + n.id;
+
+          const valTag = document.createElement("div");
+          valTag.className = "stack-item__val";
+          valTag.textContent = String(n.value);
+
+          item.appendChild(idTag);
+          item.appendChild(valTag);
+          col.appendChild(item);
+        }
+      },
+
+      captureItemRects(){
+        const map = new Map();
+        if (!this.canvasEl) return map;
+        const items = this.canvasEl.querySelectorAll(".stack-item[data-sid]");
+        items.forEach(el => map.set(el.dataset.sid, el.getBoundingClientRect()));
+        return map;
+      },
+
+      playFLIP(oldRects, durationMs){
+        if (!this.canvasEl) return;
+        const items = this.canvasEl.querySelectorAll(".stack-item[data-sid]");
+        items.forEach(el => {
+          const id = el.dataset.sid;
+          const oldRect = oldRects.get(id);
+          if (!oldRect) return;
+
+          const newRect = el.getBoundingClientRect();
+          const dx = oldRect.left - newRect.left;
+          const dy = oldRect.top - newRect.top;
+
+          el.style.transition = "none";
+          el.style.transform = `translate(${dx}px, ${dy}px)`;
+          void el.offsetWidth;
+          el.style.transition = `transform ${durationMs}ms ease`;
+          el.style.transform = "translate(0px, 0px)";
+        });
+      },
+
+      diffIds(prevSnap, nextSnap){
+        const a = new Set((prevSnap?.nodes || []).map(n => String(n.id)));
+        const b = new Set((nextSnap?.nodes || []).map(n => String(n.id)));
+        let insertedId = null, removedId = null;
+        b.forEach(id => { if (!a.has(id)) insertedId = id; });
+        a.forEach(id => { if (!b.has(id)) removedId = id; });
+        return { insertedId, removedId };
+      },
+
+      formatStepMessage(stepObj){
+        const a = String(stepObj?.action || "").toLowerCase();
+        const m = String(stepObj?.message || "").toUpperCase();
+        const hl = (stepObj?.highlight || []).map(x => String(x));
+        const hlText = hl.length ? ` [NODE ${hl.join(", ")}]` : "";
+
+        if (a === "start") return `START: ${m}${hlText}`;
+        if (a === "create") return `CREATE: ${m}${hlText}`;
+        if (a === "link") return `LINK: ${m}${hlText}`;
+        if (a === "select") return `SELECT: ${m}${hlText}`;
+        if (a === "update_ptr") return `UPDATE POINTER: ${m}${hlText}`;
+        if (a === "insert") return `INSERT: ${m}${hlText}`;
+        if (a === "remove") return `REMOVE: ${m}${hlText}`;
+        if (a === "error") return `ERROR: ${m}${hlText}`;
+        if (a === "done") return `DONE${hlText}`;
+        return `STEP: ${m}${hlText}`;
+      },
+
       // Text thông báo trạng thái
-      setStatus(msg) {
-        if (this.statusEl) this.statusEl.textContent = msg || "Ready.";
+      setStatus(msg, mode = "append") {
+        if (!this.statusEl) return;
+
+        // mode: "append" | "replace" | "clear"
+        if (mode === "clear") {
+          this.statusEl.textContent = "";
+          return;
+        }
+
+        if (mode === "replace") {
+          this.statusEl.textContent = msg || "";
+          return;
+        }
+
+        // append (mặc định)
+        const line = msg || "";
+        if (this.statusEl.textContent.trim() === "") {
+          this.statusEl.textContent = line;
+        } else {
+          this.statusEl.textContent += "\n" + line;
+        }
+
+        // auto scroll xuống cuối (nếu statusEl có scroll)
+        this.statusEl.scrollTop = this.statusEl.scrollHeight;
       },
 
       // Input
@@ -123,35 +261,96 @@ document.addEventListener("DOMContentLoaded", () => {
       },
 
       // Thao tác push / pop, sau thao tác phải render lại
-      run(op) {
-        let steps = null;
+      async run(op){
+        if (this.animating) return;
 
-        try {
+        this.setBusy(true);
+        this.setStatus("", "clear");
+        try{
+          let steps = null;
+
           if (op === "push") {
-            const v = this.getValue(); // lấy value
-            if (v == null) return this.setStatus("Please enter Element.");
-            steps = this.st.push(v);   // push vào stack
+            const v = this.getValue();
+            if (v == null) { this.setStatus("⚠️ Please enter Element.", "replace"); return; }
+            steps = this.st.push(v);
           } else if (op === "pop") {
-            steps = this.st.pop();     // pop khỏi stack
+            steps = this.st.pop();
+          } else if (op === "clear") {
+            steps = this.st.clear();
           } else {
-            return this.setStatus("Unknown op: " + op); // op lạ
+            this.setStatus("Unknown op: " + op, "replace");
+            return;
           }
-        } catch (err) {
-          // Bắt lỗi để UI không bị crash
-          this.setStatus("Error: " + (err && err.message ? err.message : String(err)));
-          return;
-        }
 
-        // Nếu có steps, lấy message cuối để báo status
-        if (Array.isArray(steps) && steps.length) {
-          const last = steps[steps.length - 1];
-          this.setStatus(last.message || "Done.");
-        } else {
-          this.setStatus("Done.");
-        }
+          if (!Array.isArray(steps) || steps.length === 0){
+            this.setStatus("Done.");
+            this.render();
+            return;
+          }
 
-        this.render();
-      },
+          // step 0
+          let prevSnap = steps[0].state;
+          this.setStatus(this.formatStepMessage(steps[0]), "append");
+          this.renderFromSnapshot(prevSnap, steps[0].highlight || []);
+          await this.sleep(this.STEP_DELAY);
+
+          // chạy từng step
+          for (let i = 1; i < steps.length; i++){
+            const s = steps[i];
+            const nextSnap = s.state;
+            const hl = (s.highlight || []).map(x => String(x));
+
+            this.setStatus(this.formatStepMessage(s), "append");
+            // REMOVE: pop-out trước (nếu có node bị xóa)
+            if (s.action === "remove") {
+              // node bị xóa là node tồn tại ở prevSnap nhưng không còn ở nextSnap
+              const d = this.diffIds(prevSnap, nextSnap);
+              if (d.removedId && this.canvasEl) {
+                const el = this.canvasEl.querySelector(`.stack-item[data-sid="${d.removedId}"]`);
+                if (el) {
+                  el.classList.add("is-leave");
+                  await this.sleep(260);
+                }
+              }
+            }
+
+            // CLEAR: pop-out toàn bộ node hiện đang có trước khi render state rỗng
+            if (s.action === "clear") {
+              if (this.canvasEl) {
+                const all = this.canvasEl.querySelectorAll(".stack-item[data-sid]");
+                all.forEach(el => el.classList.add("is-leave"));
+                await this.sleep(260);
+              }
+            }
+
+            // capture rect để FLIP
+            const oldRects = this.captureItemRects();
+
+            // render theo state mới + highlight
+            this.renderFromSnapshot(nextSnap, hl);
+
+            // FLIP shift
+            this.playFLIP(oldRects, 500);
+
+            // INSERT: pop-in node mới
+            if (s.action === "insert") {
+              const d = this.diffIds(prevSnap, nextSnap);
+              if (d.insertedId && this.canvasEl) {
+                const el = this.canvasEl.querySelector(`.stack-item[data-sid="${d.insertedId}"]`);
+                if (el) el.classList.add("is-enter");
+              }
+            }
+
+            await this.sleep(this.STEP_DELAY);
+            prevSnap = nextSnap;
+          }
+        } catch(err){
+          this.setStatus("❌ Error: " + (err?.message || String(err)), "replace");
+        } finally{
+          this.setBusy(false);
+        }
+      },  
+
 
       // Vẽ stack ra canvas
       render() {
@@ -284,8 +483,25 @@ document.addEventListener("DOMContentLoaded", () => {
       canvasEl,
 
       // Text trạng thái
-      setStatus(msg) {
-        if (statusEl) statusEl.textContent = msg || "Ready.";
+      setStatus(msg, mode = "append") {
+        if (!statusEl) return;
+
+        // mode: "append" | "replace" | "clear"
+        if (mode === "clear") {
+          statusEl.textContent = "";
+          return;
+        }
+        if (mode === "replace") {
+          statusEl.textContent = msg || "";
+          return;
+        }
+
+        // append (mặc định)
+        const line = msg || "";
+        if (statusEl.textContent.trim() === "") statusEl.textContent = line;
+        else statusEl.textContent += "\n" + line;
+
+        statusEl.scrollTop = statusEl.scrollHeight;
       },
 
       // Input
@@ -500,16 +716,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (this.animating) return;
 
         this.setBusy(true);
+        this.setStatus("", "clear");
         try{
           // validate input nhanh
           const idx = this.getIndex();
           const v = this.getValue();
 
           if (op === "insertHead" || op === "insertTail" || op === "insertAtIndex") {
-            if (v == null) { this.setStatus("⚠️ Nhập Element trước nha."); return; }
-            if (op === "insertAtIndex" && idx == null) { this.setStatus("⚠️ Nhập Index (số nguyên)."); return; }
+            if (v == null) { this.setStatus("⚠️ Nhập Element trước nha.", "replace"); }
+            if (op === "insertAtIndex" && idx == null) { this.setStatus("⚠️ Nhập Index (số nguyên).", "replace"); }
           }
-          if (op === "deleteAtIndex" && idx == null) { this.setStatus("⚠️ Nhập Index (số nguyên)."); return; }
+          if (op === "deleteAtIndex" && idx == null) { this.setStatus("⚠️ Nhập Index (số nguyên).", "replace"); }
 
           // lấy steps
           let steps = null;
@@ -530,7 +747,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           // step đầu
           let prevSnap = steps[0].state;
-          this.setStatus(this.formatStepMessage(steps[0]));
+          this.setStatus(this.formatStepMessage(steps[0]), "append");
           this.renderFromSnapshot(prevSnap, steps[0].highlight || []);
           await this.sleep(this.STEP_DELAY);
 
@@ -540,7 +757,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const nextSnap = s.state;
 
             await this.sleep(150);
-            this.setStatus(this.formatStepMessage(s));
+            this.setStatus(this.formatStepMessage(s), "append");
 
             // chuẩn hóa highlight thành string để match chắc
             const hl = (s.highlight || []).map(x => String(x));
@@ -571,7 +788,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         } catch(err){
           // ✅ có lỗi thì báo ra, không treo UI
-          this.setStatus("❌ Error: " + (err?.message || String(err)));
+          this.setStatus("❌ Error: " + (err?.message || String(err)), "replace");
         } finally{
           // ✅ dù lỗi gì cũng mở khóa
           this.setBusy(false);

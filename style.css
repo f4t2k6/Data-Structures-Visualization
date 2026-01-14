@@ -443,6 +443,9 @@ body{
   font-weight: 700;
   color: #0f172a;
   opacity: .85;
+  white-space: pre-line;
+  max-height: 60px;
+  overflow: auto;
 }
 
 .ll-canvas{
@@ -701,4 +704,52 @@ body{
   font-weight: 900;
   border: 1px solid rgba(15,23,42,0.12);
   background: rgba(255,255,255,0.65);
+}
+
+/* ===== Stack animation ===== */
+.stack-ui.is-busy .stack-btn-op{
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.stack-item{
+  will-change: transform, opacity;
+  transform-origin: center;
+}
+
+/* pop-in */
+.stack-item.is-enter{
+  opacity: 0;
+  transform: scale(0.6) translateY(-8px);
+}
+
+/* pop-out */
+.stack-item.is-leave{
+  opacity: 0;
+  transform: scale(0.75) translateY(8px);
+  transition: transform 260ms ease, opacity 260ms ease;
+}
+
+/* highlight */
+.stack-item.is-hl{
+  border-color: rgba(27, 64, 121, 0.65);
+  box-shadow: 0 10px 18px rgba(27,64,121,0.18);
+  transform: scale(1.03);
+}
+
+@keyframes stPulse{
+  0%{ transform: scale(1.00); }
+  50%{ transform: scale(1.05); }
+  100%{ transform: scale(1.00); }
+}
+.stack-item.is-pulse{
+  animation: stPulse .35s ease;
+}
+
+/* Stack status: cho phép xuống dòng + scroll */
+.stack-status{
+  white-space: pre-line;
+  max-height: 60px;       /* tuỳ bạn */
+  overflow: auto;
+  padding-right: 6px;
 }
