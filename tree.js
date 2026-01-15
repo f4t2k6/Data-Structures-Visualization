@@ -48,7 +48,7 @@
     };
   };
 
-  // ===== INSERT (BST) =====
+  // INSERT (BST)
   bst.prototype.insert = function (value) {
     var steps = [];
     steps.push(makeStep("start", "insert(" + value + ")", this));
@@ -105,7 +105,7 @@
     return steps;
   };
 
-  // ===== DELETE (BST) with steps =====
+  // DELETE (BST) with steps
   bst.prototype.delete = function (value) {
     var steps = [];
     steps.push(makeStep("start", "delete(" + value + ")", this));
@@ -204,6 +204,37 @@
     this.count--;
     steps.push(makeStep("remove", "successor removed, tree updated", this, [cur.id]));
     steps.push(makeStep("done", "delete finished", this, [cur.id]));
+    return steps;
+  };
+
+  /* ===== CLEAR (BST) ===== */
+  bst.prototype.clear = function () {
+    var steps = [];
+
+    steps.push(makeStep(
+      "start",
+      "clear()",
+      this,
+      this.root ? [this.root.id] : []
+    ));
+
+    if (!this.root) {
+      steps.push(makeStep("check", "tree is already empty", this));
+      steps.push(makeStep("done", "clear finished", this));
+      return steps;
+    }
+
+    // highlight toàn bộ node
+    var before = this.snapshot();
+    var allIds = (before.nodes || []).map(n => n.id);
+
+    steps.push(makeStep("clear", "remove all nodes", this, allIds));
+
+    // clear thật
+    this.root = null;
+    this.count = 0;
+
+    steps.push(makeStep("done", "clear finished", this));
     return steps;
   };
 

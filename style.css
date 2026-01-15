@@ -955,3 +955,73 @@ body{
 .tree-node.is-pulse{
   animation: treePulse .35s ease;
 }
+
+/* ===== Queue buttons ===== */
+.queue-btn-op{
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: var(--btn);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  transition: background-color .2s ease, transform .12s ease;
+}
+
+.queue-btn-op:hover{
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+}
+
+.queue-btn-op:active{
+  background: var(--btn-active);
+  transform: scale(0.98);
+}
+
+/* ===== Ghost button (Clear) ===== */
+.queue-btn-op.ghost{
+  background: rgba(255,255,255,0.65);
+  color: var(--c1);
+  border: 1px dashed rgba(27, 64, 121, 0.35);
+}
+
+.queue-btn-op.ghost:hover{
+  background: rgba(255,255,255,0.85);
+  color: var(--btn-hover);
+}
+
+/* ===== Binary Tree buttons ===== */
+.tree-btn-op{
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: var(--btn);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  transition: background-color .2s ease, transform .12s ease;
+}
+
+.tree-btn-op:hover{
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+}
+
+.tree-btn-op:active{
+  background: var(--btn-active);
+  transform: scale(0.98);
+}
+
+/* ===== Ghost button (Clear Tree) ===== */
+.tree-btn-op.ghost{
+  background: rgba(255,255,255,0.65);
+  color: var(--c1);
+  border: 1px dashed rgba(27, 64, 121, 0.35);
+}
+
+.tree-btn-op.ghost:hover{
+  background: rgba(255,255,255,0.85);
+  color: var(--btn-hover);
+}
+
+

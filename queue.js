@@ -131,6 +131,39 @@
     return steps;
   };
 
+  /* ===== clear ===== */
+  queue.prototype.clear = function () {
+    var steps = [];
+
+    steps.push(makeStep(
+      "start",
+      "clear()",
+      this,
+      this.head ? [this.head.id] : []
+    ));
+
+    if (this.isEmpty()) {
+      steps.push(makeStep("check", "queue is already empty", this));
+      steps.push(makeStep("done", "clear finished", this));
+      return steps;
+    }
+
+    // highlight toàn bộ node trước khi xóa
+    var before = this.snapshot();
+    var allIds = (before.nodes || []).map(n => n.id);
+
+    steps.push(makeStep("clear", "remove all nodes", this, allIds));
+
+    // clear thật
+    this.head = null;
+    this.tail = null;
+    this.count = 0;
+
+    steps.push(makeStep("done", "clear finished", this));
+    return steps;
+  };
+
+
   // export
   window.dsbrain.queue = queue;
 })();

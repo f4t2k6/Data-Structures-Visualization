@@ -627,7 +627,10 @@ document.addEventListener("DOMContentLoaded", () => {
             steps = this.q.enqueue(v);
           } else if (op === "dequeue"){
             steps = this.q.dequeue();
-          } else {
+          } else if (op === "clear") {
+            steps = this.q.clear();
+          }
+          else {
             this.setStatus("Unknown op: " + op, "replace");
             return;
           }
@@ -694,13 +697,16 @@ document.addEventListener("DOMContentLoaded", () => {
     uiRoot.addEventListener("click", (e) => {
       const b = e.target.closest(".queue-btn-op");
       if (!b) return;
+      
       queueController.run(b.dataset.op);
     });
 
     if (valueInput){
       valueInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") queueController.run("enqueue");
-      });
+      }
+      
+    );
     }
 
     queueController.setStatus("Ready.", "replace");
@@ -915,6 +921,8 @@ document.addEventListener("DOMContentLoaded", () => {
             steps = this.t.inorder();
           } else if (op === "postorder"){
             steps = this.t.postorder();
+          } else if (op === "clear") {
+            steps = this.t.clear();
           } else {
             this.setStatus("Unknown op: " + op, "replace");
             return;
